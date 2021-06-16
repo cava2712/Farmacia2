@@ -1,5 +1,9 @@
 package Esame;
-
+enum Types {
+    cliente,
+    farmacista,
+    amministratore
+}
 public class Utente {
     private Types t;
     private String nome,cognome,password,email,CF;
@@ -14,6 +18,11 @@ public class Utente {
     }
     public Utente()
     {}
+
+    public Utente(String nome, String cognome) {
+        this.nome = nome;
+        this.cognome = cognome;
+    }
 
     public Types getT() {
         return t;
@@ -73,4 +82,5 @@ public class Utente {
                 ", CF='" + CF + '\'' +
                 '}';
     }
+
 }

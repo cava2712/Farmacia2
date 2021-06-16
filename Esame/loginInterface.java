@@ -3,6 +3,16 @@ package Esame;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import kong.unirest.HttpResponse;
+import kong.unirest.JsonNode;
+import kong.unirest.Unirest;
+
 
 public class loginInterface extends JFrame implements ActionListener
 {
@@ -77,9 +87,21 @@ public class loginInterface extends JFrame implements ActionListener
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == BtnLogin) {
             //qua prendiamo i dati e poi facciamo la query
+            HttpResponse<JsonNode> jsonResponse
+                    = Unirest.post("http://localhost:8080/login")
+                    .body("{\"email\":\"asdfafa\", \"password\":\"luca\"}")
+                    .asJson();
+
+
+
             //se va a buon fine creiamo l'utente e lo passiamo come parametro alla finestra successiva
+            /*
+             * Execute the HTTP Request
+             */
+
             dispose();
             //controllo esiste cliente
+
             new HomeCliente(TextUtente.getText(),String.valueOf(TextPassword.getPassword()));
         }
         if(e.getSource() == Lreg)

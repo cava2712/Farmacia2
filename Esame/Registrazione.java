@@ -61,7 +61,7 @@ public class Registrazione extends JFrame implements ActionListener {
         if (e.getSource() == BtnCrea) {
             //qua prendiamo i dati e poi facciamo la query
             //se va a buon fine creiamo l'utente e lo passiamo come parametro alla finestra successiva
-            Utente u=new Utente(Types.Cliente,TextNome.getText(),String.valueOf(TextPass.getPassword()),TextCognome.getText(),TextEmail.getText(),TextCF.getText());
+            Utente u=new Utente(Types.cliente,TextNome.getText(),String.valueOf(TextPass.getPassword()),TextCognome.getText(),TextEmail.getText(),TextCF.getText());
             //lo creiamo nel database
             dispose();
             new HomeCliente(u.getNome(),u.getPassword());

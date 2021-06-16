@@ -4,11 +4,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.TimeZone;
+import java.net.*;
 import java.util.UUID;
 import static spark.Spark.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 public class JDBCServer {
+    static Logger logger = LoggerFactory.getLogger(JDBCServer.class);
     ObjectMapper om = new ObjectMapper();
     Statement statement;
+    public static final String JDBC_Driver_MySQL = "com.mysql.cj.jdbc.Driver";
+    public static final String JDBC_URL_MySQL = "jdbc:mysql://localhost:3306/farmacia?user=root&password=davide&serverTimezone=" +
+            TimeZone.getDefault().getID();
 
     public void run()
     {
@@ -21,39 +29,57 @@ public class JDBCServer {
         // Start embedded server at this port
         port(8080);
 
+        // POST - ritorno utente
+        // curl -X POST http://localhost:8080/login
+        post("/login", (request, response) -> {
+            String email = request.queryParams("email");
+            String pass = request.queryParams("password");
+            String query = String.format("SELECT * FROM utente WHERE email = %s AND password = %s", email,pass);
+            ResultSet rs=statement.executeQuery(query);
+            if(!rs.next())
+            {
+                response.status(404);
+                return om.writeValueAsString("{status: failed}");
+            }
+            Utente u = new Utente(Types.valueOf(rs.getString("types")),rs.getString("nome"), rs.getString("cognome"),rs.getString("password"),rs.getString("email"),rs.getString("cf"));
+            response.status(201);
+            return u;
+        });
+        // GET - get all
+        // For testing: curl -X GET http://localhost:8080/utenti
+        get("/utenti", (request, response) -> {
+            ResultSet rs = statement.executeQuery("SELECT * FROM utente");
+            ArrayList<Utente> l = new ArrayList<>();
+            while (rs.next()) {
+                l.add(new Utente(Types.valueOf(rs.getString("types")),rs.getString("nome"), rs.getString("cognome"),rs.getString("password"),rs.getString("email"),rs.getString("cf")));
+
+            }
+            return l;
+        });
     }
 
     public void dbConnection() throws SQLException {
         DBManager.setConnection(
-                Utils.JDBC_Driver_SQLite,
-                Utils.JDBC_URL_SQLite);
+                JDBC_Driver_MySQL,
+                JDBC_URL_MySQL);
         statement = DBManager.getConnection().createStatement();
-
+        /*
         try {
-            statement.executeQuery("SELECT * FROM sausage LIMIT 1");
-        } catch (SQLException e) {
-            try {
-                statement.executeUpdate("DROP TABLE IF EXISTS sausage");
-                statement.executeUpdate("DROP TABLE IF EXISTS log");
-                statement.executeUpdate("CREATE TABLE sausage (" + "id VARCHAR(50) PRIMARY KEY, " + "length REAL, "
-                        + "diameter REAL, " + "weight REAL, " + "quality VARCHAR(50))");
-                statement.executeUpdate(
-                        "CREATE TABLE log (" + "id INTEGER PRIMARY KEY AUTOINCREMENT, " + "query VARCHAR(1024))");
+            ResultSet rs = statement.executeQuery("SELECT * FROM utente");
+            while (rs.next()) {
+                System.out.println(rs.getString("nome"));
+            }
 
-                /* Examples for developing */
-                statement.executeUpdate(
-                        "INSERT INTO sausage (id, length, diameter, weight, quality) VALUES ('214bb0db-aa52-48be-b052-cd30f730ae79', 30.2, 30.0, 2.6, 'High')");
-                statement.executeUpdate(
-                        "INSERT INTO sausage (id, length, diameter, weight, quality) VALUES ('03e9e721-f241-4539-9cc7-baecd8b3a931', 40.3, 35.5, 2.2, 'Low')");
-                statement.executeUpdate(
-                        "INSERT INTO sausage (id, length, diameter, weight, quality) VALUES ('e1f0dcb0-181b-4463-97d7-edcfed736ae1', 35.1, 28.2, 4.3, 'High')");
-            } catch (SQLException e1) {
+        }
+        catch (SQLException e)
+            {
                 throw new RuntimeException();
             }
-        }
+         */
     }
 
+
     public static void main(String[] args) {
-        //new JDBCServer().run();
+        new JDBCServer().run();
     }
 }
