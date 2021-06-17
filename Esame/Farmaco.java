@@ -2,7 +2,10 @@ package Esame;
 
 public class Farmaco {
     private int codice,quantità;
-    private String nome,marca,categoria;
+    private String nome;
+    private String marca;
+    private String categoria;
+    private String percorsoImg;
     private float prezzo;
     public Farmaco(int codice, int quantità, String nome, String marca, String categoria, float prezzo) {
         this.codice = codice;
@@ -11,6 +14,13 @@ public class Farmaco {
         this.marca = marca;
         this.categoria = categoria;
         this.prezzo = prezzo;
+    }
+    public String getPercorsoImg() {
+        return percorsoImg;
+    }
+
+    public void setPercorsoImg(String percorsoImg) {
+        this.percorsoImg = percorsoImg;
     }
     public int getCodice() {
         return codice;

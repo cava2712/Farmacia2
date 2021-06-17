@@ -12,48 +12,85 @@ public class Registrazione extends JFrame implements ActionListener {
     private final JTextField TextEmail;
     private final JTextField TextCF;
     private final JButton BtnCrea;
+    private final JLabel Ln;
+    private final JLabel Lp;
+    private final JLabel Lc;
+    private final JLabel Le;
+    private final JLabel Lcf;
 
     public Registrazione() {
         super("Registrazione");
-        TextNome = new JTextField();
-        TextPass = new JPasswordField();
-        TextCognome = new JTextField();
-        TextEmail = new JTextField();
-        TextCF = new JTextField();
-        BtnCrea = new JButton("Crea account");
-
-
-        JPanel p1 = new JPanel(new GridLayout(5, 2,3,5));
-        p1.add(new JLabel("Nome"));
-        p1.add(TextNome);
-        p1.add(new JLabel("Password"));
-        p1.add(TextPass);
-        p1.add(new JLabel("Cognome"));
-        p1.add(TextCognome);
-        p1.add(new JLabel("Email"));
-        p1.add(TextEmail);
-        p1.add(new JLabel("CF"));
-        p1.add(TextCF);
-
-
-
-        JPanel p2 = new JPanel(new GridLayout(1, 1,3,5));
-        p2.add(BtnCrea);
-
-        JPanel p4 = new JPanel(new BorderLayout());
-        p4.add(p1, BorderLayout.NORTH);
-        p4.add(p2, BorderLayout.CENTER);
-
-
-        /* JFrame methods called */
-        setContentPane(p4);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setSize(350, 200);
-        setVisible(true);
+        setSize(600, 550);
         setResizable(false);
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
-        BtnCrea.addActionListener(this);
+        this.setLayout(null);
+
+        Ln=new JLabel("Nome");
+        Ln.setFont(new Font("Arial", Font.PLAIN, 30));
+        Ln.setSize(200, 30);
+        Ln.setLocation(10, 30);
+        this.add(Ln);
+        TextNome = new JTextField();
+        TextNome.setFont(new Font("Arial", Font.PLAIN, 30));
+        TextNome.setSize(350, 30);
+        TextNome.setLocation(200, 30);
+        this.add(TextNome);
+
+        Lc=new JLabel("Cognome");
+        Lc.setFont(new Font("Arial", Font.PLAIN, 30));
+        Lc.setSize(200, 30);
+        Lc.setLocation(10, 100);
+        this.add(Lc);
+        TextCognome = new JTextField();
+        TextCognome.setFont(new Font("Arial", Font.PLAIN, 30));
+        TextCognome.setSize(350, 30);
+        TextCognome.setLocation(200, 100);
+        this.add(TextCognome);
+
+        Lp=new JLabel("Password");
+        Lp.setFont(new Font("Arial", Font.PLAIN, 30));
+        Lp.setSize(200, 30);
+        Lp.setLocation(10, 170);
+        this.add(Lp);
+        TextPass = new JPasswordField();
+        TextPass.setFont(new Font("Arial", Font.PLAIN, 30));
+        TextPass.setSize(350, 30);
+        TextPass.setLocation(200, 170);
+        this.add(TextPass);
+
+        Le=new JLabel("Email");
+        Le.setFont(new Font("Arial", Font.PLAIN, 30));
+        Le.setSize(200, 30);
+        Le.setLocation(10, 240);
+        this.add(Le);
+        TextEmail = new JTextField();
+        TextEmail.setFont(new Font("Arial", Font.PLAIN, 30));
+        TextEmail.setSize(350, 30);
+        TextEmail.setLocation(200, 240);
+        this.add(TextEmail);
+
+        Lcf=new JLabel("CF");
+        Lcf.setFont(new Font("Arial", Font.PLAIN, 30));
+        Lcf.setSize(200, 30);
+        Lcf.setLocation(10, 310);
+        this.add(Lcf);
+        TextCF = new JTextField();
+        TextCF.setFont(new Font("Arial", Font.PLAIN, 30));
+        TextCF.setSize(350, 30);
+        TextCF.setLocation(200, 310);
+        this.add(TextCF);
+
+        BtnCrea = new JButton("Crea account");
+        BtnCrea.setFont(new Font("Arial", Font.PLAIN, 30));
+        BtnCrea.setSize(600, 60);
+        BtnCrea.setLocation(0, 450);
+        this.add(BtnCrea);
+
+
+        setVisible(true);
+
     }
 
     @Override

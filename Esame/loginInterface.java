@@ -16,7 +16,6 @@ import kong.unirest.Unirest;
 
 public class loginInterface extends JFrame implements ActionListener
 {
-    private static final long serialVersionUID = 1L;
     private final JRadioButton RadioFarmacista;
     private final JRadioButton RadioCliente;
     private final JRadioButton RadioAmministratore;
@@ -25,58 +24,108 @@ public class loginInterface extends JFrame implements ActionListener
     private final JButton BtnLogin;
     private final JButton Lreg;
     private final ButtonGroup RadioGroup;
-    private final JLabel Nc;
+    private final JLabel Lc;
+    private final JLabel Lf;
+    private final JLabel La;
+    private final JLabel Lu;
+    private final JLabel Lp;
+    private final JLabel Ln;
+    private final JLabel Ls;
 
     public loginInterface() {
         super("Login");
-        RadioFarmacista = new JRadioButton();
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setSize(800, 550);
+        setResizable(false);
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
+        this.setLayout(null);
+
+        Lc=new JLabel("Cliente");
+        Lc.setFont(new Font("Arial", Font.PLAIN, 30));
+        Lc.setSize(200, 30);
+        Lc.setLocation(10, 30);
+        this.add(Lc);
         RadioCliente = new JRadioButton();
+        RadioCliente.setFont(new Font("Arial", Font.PLAIN, 15));
+        RadioCliente.setSelected(true);
+        RadioCliente.setSize(75, 20);
+        RadioCliente.setLocation(250,35);
+
+        Lf=new JLabel("Farmacista");
+        Lf.setFont(new Font("Arial", Font.PLAIN, 30));
+        Lf.setSize(200, 30);
+        Lf.setLocation(10, 100);
+        this.add(Lf);
+        RadioFarmacista = new JRadioButton();
+        RadioFarmacista.setFont(new Font("Arial", Font.PLAIN, 15));
+        RadioFarmacista.setSize(75, 20);
+        RadioFarmacista.setLocation(250,105);
+
+        La=new JLabel("Amministratore");
+        La.setFont(new Font("Arial", Font.PLAIN, 30));
+        La.setSize(200, 30);
+        La.setLocation(10, 170);
+        this.add(La);
         RadioAmministratore = new JRadioButton();
+        RadioAmministratore.setFont(new Font("Arial", Font.PLAIN, 15));
+        RadioAmministratore.setSize(75, 20);
+        RadioAmministratore.setLocation(250,175);
+
+        Lu=new JLabel("Username");
+        Lu.setFont(new Font("Arial", Font.PLAIN, 30));
+        Lu.setSize(200, 30);
+        Lu.setLocation(10, 240);
+        this.add(Lu);
+        TextUtente = new JTextField();
+        TextUtente.setFont(new Font("Arial", Font.PLAIN, 30));
+        TextUtente.setSize(200, 30);
+        TextUtente.setLocation(250, 240);
+        this.add(TextUtente);
+
+        Lp=new JLabel("Password");
+        Lp.setFont(new Font("Arial", Font.PLAIN, 30));
+        Lp.setSize(200, 30);
+        Lp.setLocation(10, 310);
+        this.add(Lp);
+        TextPassword = new JPasswordField();
+        TextPassword.setFont(new Font("Arial", Font.PLAIN, 30));
+        TextPassword.setSize(200, 30);
+        TextPassword.setLocation(250, 310);
+        this.add(TextPassword);
+
+        Ln=new JLabel("non hai un account?");
+        Ln.setFont(new Font("Arial", Font.PLAIN, 30));
+        Ln.setSize(400, 30);
+        Ln.setLocation(10, 380);
+        this.add(Ln);
+        Lreg = new JButton("Registrati");
+        Lreg.setFont(new Font("Arial", Font.PLAIN, 30));
+        Lreg.setSize(200, 30);
+        Lreg.setLocation(580, 380);
+        this.add(Lreg);
+
+        Ls=new JLabel("hai già un account?");
+        Ls.setFont(new Font("Arial", Font.PLAIN, 30));
+        Ls.setSize(400, 30);
+        Ls.setLocation(10, 450);
+        this.add(Ls);
+        BtnLogin = new JButton("Login");
+        BtnLogin.setFont(new Font("Arial", Font.PLAIN, 30));
+        BtnLogin.setSize(200, 30);
+        BtnLogin.setLocation(580, 450);
+        this.add(BtnLogin);
+
+
         RadioGroup = new ButtonGroup();
         RadioGroup.add(RadioAmministratore);
         RadioGroup.add(RadioFarmacista);
         RadioGroup.add(RadioCliente);
-        TextUtente = new JTextField();
-        TextPassword = new JPasswordField();
-        TextPassword.setSize(190, 20);
-        BtnLogin = new JButton("Login");
-        Lreg = new JButton("Registrati");
-        Nc=new JLabel("Cliente");
+        this.add(RadioCliente);
+        this.add(RadioAmministratore);
+        this.add(RadioFarmacista);
 
-        JPanel p1 = new JPanel(new GridLayout(3, 1,3,5));
-        p1.add(Nc);
-        p1.add(RadioCliente);
-        p1.add(new JLabel("Farmacista"));
-        p1.add(RadioFarmacista);
-        p1.add(new JLabel("Amminstatore"));
-        p1.add(RadioAmministratore);
-
-
-
-        JPanel p2 = new JPanel(new GridLayout(3, 2,3,5));
-        p2.add(new JLabel("Username"));
-        p2.add(TextUtente);
-        p2.add(new JLabel("Password"));
-        p2.add(TextPassword);
-        p2.add(new JLabel("non hai un account?"));
-        p2.add(Lreg);
-
-        JPanel p3 = new JPanel(new GridLayout(1, 1,3,5));
-        p3.add(BtnLogin);
-
-        JPanel p4 = new JPanel(new BorderLayout());
-        p4.add(p1, BorderLayout.NORTH);
-        p4.add(p2, BorderLayout.CENTER);
-        p4.add(p3, BorderLayout.SOUTH);
-
-        /* JFrame methods called */
-        setContentPane(p4);
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setSize(350, 200);
         setVisible(true);
-        setResizable(false);
-        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-        this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
         BtnLogin.addActionListener(this);
         Lreg.addActionListener(this);
 
