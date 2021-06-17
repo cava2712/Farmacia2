@@ -1,5 +1,7 @@
 package Esame;
 
+import kong.unirest.Unirest;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -87,9 +89,10 @@ public class Registrazione extends JFrame implements ActionListener {
         BtnCrea.setSize(600, 60);
         BtnCrea.setLocation(0, 450);
         this.add(BtnCrea);
-
+        BtnCrea.addActionListener(this);
 
         setVisible(true);
+        new JDBCServer().run();
 
     }
 
@@ -97,6 +100,15 @@ public class Registrazione extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == BtnCrea) {
             //qua prendiamo i dati e poi facciamo la query
+            String url = "http://localhost:8080/crea";
+            String response = Unirest.post(url)
+                    .field("types", "cliente")
+                    .field("email", TextEmail.getText())
+                    .field("password", String.valueOf(TextPass.getPassword()))
+                    .field("cf", TextCF.getText())
+                    .field("cognome", TextCognome.getText())
+                    .field("nome", TextNome.getText())
+                    .asString().getBody();
             //se va a buon fine creiamo l'utente e lo passiamo come parametro alla finestra successiva
             Utente u=new Utente(Types.cliente,TextNome.getText(),String.valueOf(TextPass.getPassword()),TextCognome.getText(),TextEmail.getText(),TextCF.getText());
             //lo creiamo nel database

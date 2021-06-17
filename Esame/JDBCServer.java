@@ -29,21 +29,37 @@ public class JDBCServer {
         // Start embedded server at this port
         port(8080);
 
+        // POST - creazione utente
+        // curl -X POST http://localhost:8080/crea
+        post("/crea", (request, response) -> {
+            String email = request.queryParams("email");
+            String pass = request.queryParams("password");
+            String type = "cliente";
+            String cf = request.queryParams("cf");
+            String nome = request.queryParams("nome");
+            String cognome = request.queryParams("cognome");
+            String query = String.format("INSERT INTO `farmacia`.`utente` (`cf`, `nome`, `cognome`, `types`, `password`, `email`) VALUES ('%s','%s','%s','%s','%s','%s')",cf,nome,cognome,type,pass,email);
+            statement.executeUpdate(query);
+
+            response.status(201);
+            return "ok";
+        });
         // POST - ritorno utente
         // curl -X POST http://localhost:8080/login
         post("/login", (request, response) -> {
             String email = request.queryParams("email");
             String pass = request.queryParams("password");
-            String query = String.format("SELECT * FROM utente WHERE email = %s AND password = %s", email,pass);
+            String type = request.queryParams("types");
+            String query = String.format("SELECT * FROM utente WHERE email = '%s' AND password = '%s' AND types = '%s' ", email,pass,type);
             ResultSet rs=statement.executeQuery(query);
             if(!rs.next())
             {
                 response.status(404);
-                return om.writeValueAsString("{status: failed}");
+                return "failed";
             }
             Utente u = new Utente(Types.valueOf(rs.getString("types")),rs.getString("nome"), rs.getString("cognome"),rs.getString("password"),rs.getString("email"),rs.getString("cf"));
             response.status(201);
-            return u;
+            return om.writeValueAsString(u);
         });
         // GET - get all
         // For testing: curl -X GET http://localhost:8080/utenti

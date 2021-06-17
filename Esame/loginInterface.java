@@ -5,13 +5,11 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
-
-import kong.unirest.HttpResponse;
-import kong.unirest.JsonNode;
 import kong.unirest.Unirest;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 
 
 public class loginInterface extends JFrame implements ActionListener
@@ -47,6 +45,7 @@ public class loginInterface extends JFrame implements ActionListener
         Lc.setLocation(10, 30);
         this.add(Lc);
         RadioCliente = new JRadioButton();
+        RadioCliente.setName("cliente");
         RadioCliente.setFont(new Font("Arial", Font.PLAIN, 15));
         RadioCliente.setSelected(true);
         RadioCliente.setSize(75, 20);
@@ -58,6 +57,7 @@ public class loginInterface extends JFrame implements ActionListener
         Lf.setLocation(10, 100);
         this.add(Lf);
         RadioFarmacista = new JRadioButton();
+        RadioFarmacista.setName("farmacista");
         RadioFarmacista.setFont(new Font("Arial", Font.PLAIN, 15));
         RadioFarmacista.setSize(75, 20);
         RadioFarmacista.setLocation(250,105);
@@ -68,11 +68,12 @@ public class loginInterface extends JFrame implements ActionListener
         La.setLocation(10, 170);
         this.add(La);
         RadioAmministratore = new JRadioButton();
+        RadioAmministratore.setName("amministratore");
         RadioAmministratore.setFont(new Font("Arial", Font.PLAIN, 15));
         RadioAmministratore.setSize(75, 20);
         RadioAmministratore.setLocation(250,175);
 
-        Lu=new JLabel("Username");
+        Lu=new JLabel("Email");
         Lu.setFont(new Font("Arial", Font.PLAIN, 30));
         Lu.setSize(200, 30);
         Lu.setLocation(10, 240);
@@ -128,7 +129,7 @@ public class loginInterface extends JFrame implements ActionListener
         setVisible(true);
         BtnLogin.addActionListener(this);
         Lreg.addActionListener(this);
-
+        new JDBCServer().run();
     }
 
 
@@ -136,18 +137,26 @@ public class loginInterface extends JFrame implements ActionListener
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == BtnLogin) {
             //qua prendiamo i dati e poi facciamo la query
-            HttpResponse<JsonNode> jsonResponse
-                    = Unirest.post("http://localhost:8080/login")
-                    .body("{\"email\":\"asdfafa\", \"password\":\"luca\"}")
-                    .asJson();
 
-
-
-            //se va a buon fine creiamo l'utente e lo passiamo come parametro alla finestra successiva
-            /*
-             * Execute the HTTP Request
-             */
-
+            String radio=null;
+            if(RadioCliente.isSelected())
+                radio=RadioCliente.getName();
+            if(RadioAmministratore.isSelected())
+                radio=RadioAmministratore.getName();
+            if(RadioFarmacista.isSelected())
+                radio=RadioFarmacista.getName();
+            String url = "http://localhost:8080/login";
+            String response = Unirest.post(url)
+                    .field("types", radio)
+                    .field("email", TextUtente.getText())
+                    .field("password", String.valueOf(TextPassword.getPassword()))
+                    .asString().getBody();
+            if (response.equals("failed"))
+            {
+                JOptionPane.showMessageDialog(null, "Email o password errati");
+                return;
+            }
+            System.out.println(response);
             dispose();
             //controllo esiste cliente
 
