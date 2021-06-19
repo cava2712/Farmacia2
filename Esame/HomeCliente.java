@@ -1,5 +1,7 @@
 package Esame;
 
+import kong.unirest.Unirest;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -17,9 +19,10 @@ public class HomeCliente extends JFrame implements ActionListener {
     private final JMenu Opzioni;
     private final JMenu Carrello;
     private final JMenuItem Disconnetti,Profilo;
+    private final JLabel utente;
+    Utente ug=null;
 
-
-    public HomeCliente(String nomeUtente,String passUtente) {
+    public HomeCliente(Utente u) {
         super("HOME");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setSize(800, 700);
@@ -27,7 +30,7 @@ public class HomeCliente extends JFrame implements ActionListener {
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
         this.setLayout(null);
-
+        ug=u;
         MenuBar= new JMenuBar();
         Opzioni = new  JMenu("opzioni");
         Carrello = new  JMenu("Carrello");
@@ -39,6 +42,11 @@ public class HomeCliente extends JFrame implements ActionListener {
         Opzioni.add(Profilo);
         this.setJMenuBar(MenuBar);
 
+        utente= new JLabel(String.format("Utente:%s Email:%s", u.getNome(),u.getEmail()));
+        utente.setFont(new Font("Arial", Font.PLAIN, 30));
+        utente.setSize(400, 30);
+        utente.setLocation(45, 10);
+        this.add(utente);
         BtnMed = new JButton("MIE MEDICINE");
         BtnMed.setSize(200,200);
         BtnMed.setLocation(45,50);
@@ -63,19 +71,35 @@ public class HomeCliente extends JFrame implements ActionListener {
         this.add(BtnRicetta);
         this.add(BtnFarmaci);
         this.add(BtnProfilo);
+
         BtnDisc = new JButton("Disconnettiti");
         BtnDisc.setSize(200,50);
         BtnDisc.setLocation(545,550);
         this.add(BtnDisc);
+        BtnProfilo.addActionListener(this);
+        BtnDisc.addActionListener(this);
+        BtnFarmaci.addActionListener(this);
         setVisible(true);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
+        if (e.getSource() == BtnProfilo) {
+            dispose();
+            new Profilo(ug);
+        }
+        if (e.getSource() == BtnDisc) {
+            dispose();
+            new loginInterface();
+        }
+        if (e.getSource() == BtnFarmaci) {
+            dispose();
+            try {
+                new TuttiFarmaci();
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+        }
     }
 
-    public static void main(String[] args) {
-        new Esame.HomeCliente("davide","figo");
-    }
 }

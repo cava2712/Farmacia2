@@ -7,13 +7,18 @@ public class Farmaco {
     private String categoria;
     private String percorsoImg;
     private float prezzo;
-    public Farmaco(int codice, int quantità, String nome, String marca, String categoria, float prezzo) {
+    public Farmaco()
+    {
+
+    }
+    public Farmaco(int codice, int quantità, String nome, String marca, String categoria, float prezzo,String percorsoImg) {
         this.codice = codice;
         this.quantità = quantità;
         this.nome = nome;
         this.marca = marca;
         this.categoria = categoria;
         this.prezzo = prezzo;
+        this.percorsoImg=percorsoImg;
     }
     public String getPercorsoImg() {
         return percorsoImg;

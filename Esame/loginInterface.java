@@ -7,13 +7,14 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import kong.unirest.Unirest;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-
-
 public class loginInterface extends JFrame implements ActionListener
 {
+    static boolean ser=true;
     private final JRadioButton RadioFarmacista;
     private final JRadioButton RadioCliente;
     private final JRadioButton RadioAmministratore;
@@ -29,6 +30,7 @@ public class loginInterface extends JFrame implements ActionListener
     private final JLabel Lp;
     private final JLabel Ln;
     private final JLabel Ls;
+    ObjectMapper om = new ObjectMapper();
 
     public loginInterface() {
         super("Login");
@@ -129,7 +131,10 @@ public class loginInterface extends JFrame implements ActionListener
         setVisible(true);
         BtnLogin.addActionListener(this);
         Lreg.addActionListener(this);
-        new JDBCServer().run();
+        if(ser) {
+            new JDBCServer().run();
+            ser=false;
+        }
     }
 
 
@@ -156,11 +161,18 @@ public class loginInterface extends JFrame implements ActionListener
                 JOptionPane.showMessageDialog(null, "Email o password errati");
                 return;
             }
-            System.out.println(response);
+
+            Utente u = null;
+            try{
+                u= om.readValue(response,Utente.class);
+            }
+            catch (IOException ee) {
+                ee.printStackTrace();
+            }
             dispose();
             //controllo esiste cliente
 
-            new HomeCliente(TextUtente.getText(),String.valueOf(TextPassword.getPassword()));
+            new HomeCliente(u);
         }
         if(e.getSource() == Lreg)
         {

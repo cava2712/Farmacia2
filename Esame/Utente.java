@@ -6,19 +6,30 @@ enum Types {
 }
 public class Utente {
     private Types t;
-    private String nome,cognome,password,email,CF;
 
-    public Utente(Types t, String nome, String cognome, String password, String email, String CF) {
+
+
+    private String nome,cognome,password,email,CF,img;
+
+    public Utente(Types t, String nome, String cognome, String password, String email, String CF, String img) {
         this.t = t;
         this.nome = nome;
         this.cognome = cognome;
         this.password = password;
         this.email = email;
         this.CF = CF;
+        this.img = img;
     }
+
     public Utente()
     {}
+    public String getImg() {
+        return img;
+    }
 
+    public void setImg(String img) {
+        this.img = img;
+    }
     public Utente(String nome, String cognome) {
         this.nome = nome;
         this.cognome = cognome;

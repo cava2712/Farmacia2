@@ -2,6 +2,7 @@ package Esame;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.TimeZone;
@@ -38,9 +39,43 @@ public class JDBCServer {
             String cf = request.queryParams("cf");
             String nome = request.queryParams("nome");
             String cognome = request.queryParams("cognome");
-            String query = String.format("INSERT INTO `farmacia`.`utente` (`cf`, `nome`, `cognome`, `types`, `password`, `email`) VALUES ('%s','%s','%s','%s','%s','%s')",cf,nome,cognome,type,pass,email);
-            statement.executeUpdate(query);
+            String query = String.format("INSERT INTO `farmacia`.`utente` (`cf`, `nome`, `cognome`, `types`, `password`, `email`, `img`) VALUES ('%s','%s','%s','%s','%s','%s','%s')",cf,nome,cognome,type,pass,email,null);
+            try {
+                statement.executeUpdate(query);
+            }
+            catch(SQLException e)
+            {
+                if(e.getSQLState().startsWith("23")) //23 codice errore di SQLIntegrityConstraintViolationException
+                {
+                    return "doppio";
+                }
+                else
+                {
+                    throw new SQLException(e);
+                }
+            }
+            response.status(201);
+            return "ok";
+        });
 
+        // POST - creazione utente
+        // curl -X POST http://localhost:8080/aggiorna
+        post("/aggiorna", (request, response) -> {
+            String email = request.queryParams("email");
+            String emailp = request.queryParams("emailp");
+            String pass = request.queryParams("password");
+            String type = "cliente";
+            String cf = request.queryParams("cf");
+            String nome = request.queryParams("nome");
+            String cognome = request.queryParams("cognome");
+            String query = String.format("UPDATE `farmacia`.`utente` SET `cf` = '%s', `nome` = '%s', `cognome` = '%s', `types` = '%s', `password` = '%s', `email` = '%s', `img` = '%s' WHERE (`email` = '%s')",cf,nome,cognome,type,pass,email,null,emailp);
+            try {
+                statement.executeUpdate(query);
+            }
+            catch(SQLException e)
+            {
+                    throw new SQLException(e);
+            }
             response.status(201);
             return "ok";
         });
@@ -57,20 +92,32 @@ public class JDBCServer {
                 response.status(404);
                 return "failed";
             }
-            Utente u = new Utente(Types.valueOf(rs.getString("types")),rs.getString("nome"), rs.getString("cognome"),rs.getString("password"),rs.getString("email"),rs.getString("cf"));
+            Utente u = new Utente(Types.valueOf(rs.getString("types")),rs.getString("nome"), rs.getString("cognome"),rs.getString("password"),rs.getString("email"),rs.getString("cf"),rs.getString("img"));
             response.status(201);
             return om.writeValueAsString(u);
         });
-        // GET - get all
+        // GET - get all utenti
         // For testing: curl -X GET http://localhost:8080/utenti
         get("/utenti", (request, response) -> {
             ResultSet rs = statement.executeQuery("SELECT * FROM utente");
             ArrayList<Utente> l = new ArrayList<>();
             while (rs.next()) {
-                l.add(new Utente(Types.valueOf(rs.getString("types")),rs.getString("nome"), rs.getString("cognome"),rs.getString("password"),rs.getString("email"),rs.getString("cf")));
+                l.add(new Utente(Types.valueOf(rs.getString("types")),rs.getString("nome"), rs.getString("cognome"),rs.getString("password"),rs.getString("email"),rs.getString("cf"),rs.getString("img")));
 
             }
             return l;
+        });
+
+        // GET - get all Farmaci
+        // For testing: curl -X GET http://localhost:8080/farmaci int codice, int quantità, String nome, String marca, String categoria, float prezzo
+        get("/farmaci", (request, response) -> {
+            ResultSet rs = statement.executeQuery("SELECT * FROM farmaco");
+            ArrayList<Farmaco> l = new ArrayList<Farmaco>();
+            while (rs.next()) {
+                l.add(new Farmaco(rs.getInt("codice"),rs.getInt("quantità"), rs.getString("nome"),rs.getString("marca"),rs.getString("categoria"),rs.getFloat("prezzo"),rs.getString("percorsoImg")));
+
+            }
+            return om.writeValueAsString(l);
         });
     }
 
