@@ -30,6 +30,7 @@ public class loginInterface extends JFrame implements ActionListener
     private final JLabel Lp;
     private final JLabel Ln;
     private final JLabel Ls;
+
     ObjectMapper om = new ObjectMapper();
 
     public loginInterface() {

@@ -140,8 +140,6 @@ public class JDBCServer {
             }
          */
     }
-
-
     public static void main(String[] args) {
         new JDBCServer().run();
     }

@@ -17,7 +17,7 @@ public class HomeCliente extends JFrame implements ActionListener {
     private final JButton BtnDisc;
     private final JMenuBar MenuBar;
     private final JMenu Opzioni;
-    private final JMenu Carrello;
+    private final JMenuItem Carrello;
     private final JMenuItem Disconnetti,Profilo;
     private final JLabel utente;
     Utente ug=null;
@@ -33,7 +33,7 @@ public class HomeCliente extends JFrame implements ActionListener {
         ug=u;
         MenuBar= new JMenuBar();
         Opzioni = new  JMenu("opzioni");
-        Carrello = new  JMenu("Carrello");
+        Carrello = new  JMenuItem(String.format("Carrello:%d",u.numCarrello()));
         Disconnetti= new JMenuItem("Disconnetiti");
         Profilo= new JMenuItem(("profilo"));
         MenuBar.add(Opzioni);
@@ -79,6 +79,7 @@ public class HomeCliente extends JFrame implements ActionListener {
         BtnProfilo.addActionListener(this);
         BtnDisc.addActionListener(this);
         BtnFarmaci.addActionListener(this);
+        Carrello.addActionListener(this);
         setVisible(true);
     }
 
@@ -88,6 +89,14 @@ public class HomeCliente extends JFrame implements ActionListener {
             dispose();
             new Profilo(ug);
         }
+        if (e.getSource() == Carrello) {
+            try {
+                dispose();
+                new Carrello(ug);
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+        }
         if (e.getSource() == BtnDisc) {
             dispose();
             new loginInterface();
@@ -95,7 +104,7 @@ public class HomeCliente extends JFrame implements ActionListener {
         if (e.getSource() == BtnFarmaci) {
             dispose();
             try {
-                new TuttiFarmaci();
+                new TuttiFarmaci(ug);
             } catch (Exception exception) {
                 exception.printStackTrace();
             }

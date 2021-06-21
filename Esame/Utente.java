@@ -1,4 +1,7 @@
 package Esame;
+
+import java.util.ArrayList;
+
 enum Types {
     cliente,
     farmacista,
@@ -6,10 +9,8 @@ enum Types {
 }
 public class Utente {
     private Types t;
-
-
-
     private String nome,cognome,password,email,CF,img;
+    public ArrayList<Farmaco> carrello;
 
     public Utente(Types t, String nome, String cognome, String password, String email, String CF, String img) {
         this.t = t;
@@ -19,6 +20,7 @@ public class Utente {
         this.email = email;
         this.CF = CF;
         this.img = img;
+        carrello=new ArrayList<Farmaco>();
     }
 
     public Utente()
@@ -34,7 +36,6 @@ public class Utente {
         this.nome = nome;
         this.cognome = cognome;
     }
-
     public Types getT() {
         return t;
     }
@@ -92,6 +93,14 @@ public class Utente {
                 ", email='" + email + '\'' +
                 ", CF='" + CF + '\'' +
                 '}';
+    }
+    public int numCarrello()
+    {
+        int conta=0;
+        for (Farmaco f: this.carrello) {
+            conta+=f.getQuantità();
+        }
+        return conta;
     }
 
 }
