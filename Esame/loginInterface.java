@@ -22,6 +22,8 @@ public class loginInterface extends JFrame implements ActionListener
     private final JPasswordField TextPassword;
     private final JButton BtnLogin;
     private final JButton Lreg;
+    private final JButton Newpass;
+    private final JLabel Lnp;
     private final ButtonGroup RadioGroup;
     private final JLabel Lc;
     private final JLabel Lf;
@@ -31,12 +33,13 @@ public class loginInterface extends JFrame implements ActionListener
     private final JLabel Ln;
     private final JLabel Ls;
 
+
     ObjectMapper om = new ObjectMapper();
 
     public loginInterface() {
         super("Login");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setSize(800, 550);
+        setSize(800, 600);
         setResizable(false);
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
@@ -105,8 +108,8 @@ public class loginInterface extends JFrame implements ActionListener
         this.add(Ln);
         Lreg = new JButton("Registrati");
         Lreg.setFont(new Font("Arial", Font.PLAIN, 30));
-        Lreg.setSize(200, 30);
-        Lreg.setLocation(580, 380);
+        Lreg.setSize(270, 30);
+        Lreg.setLocation(510, 380);
         this.add(Lreg);
 
         Ls=new JLabel("hai già un account?");
@@ -116,9 +119,20 @@ public class loginInterface extends JFrame implements ActionListener
         this.add(Ls);
         BtnLogin = new JButton("Login");
         BtnLogin.setFont(new Font("Arial", Font.PLAIN, 30));
-        BtnLogin.setSize(200, 30);
-        BtnLogin.setLocation(580, 450);
+        BtnLogin.setSize(270, 30);
+        BtnLogin.setLocation(510, 450);
         this.add(BtnLogin);
+
+        Lnp=new JLabel("hai dimenticato la password?");
+        Lnp.setFont(new Font("Arial", Font.PLAIN, 30));
+        Lnp.setSize(400, 30);
+        Lnp.setLocation(10, 520);
+        this.add(Lnp);
+        Newpass = new JButton("Nuova password");
+        Newpass.setFont(new Font("Arial", Font.PLAIN, 30));
+        Newpass.setSize(270, 30);
+        Newpass.setLocation(510, 520);
+        this.add(Newpass);
 
 
         RadioGroup = new ButtonGroup();
@@ -132,6 +146,7 @@ public class loginInterface extends JFrame implements ActionListener
         setVisible(true);
         BtnLogin.addActionListener(this);
         Lreg.addActionListener(this);
+        Newpass.addActionListener(this);
         if(ser) {
             new JDBCServer().run();
             ser=false;
@@ -179,6 +194,11 @@ public class loginInterface extends JFrame implements ActionListener
         {
             dispose();
             new Registrazione();
+        }
+        if(e.getSource() == Newpass)
+        {
+            dispose();
+            new ModPass();
         }
     }
 

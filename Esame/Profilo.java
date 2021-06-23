@@ -1,6 +1,9 @@
 package Esame;
 
 import kong.unirest.Unirest;
+import org.jdatepicker.impl.JDatePanelImpl;
+import org.jdatepicker.impl.JDatePickerImpl;
+import org.jdatepicker.impl.UtilDateModel;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -10,6 +13,9 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.Properties;
 
 public class Profilo extends JFrame implements ActionListener {
     private final JTextField TextNome;
@@ -26,87 +32,108 @@ public class Profilo extends JFrame implements ActionListener {
     private final JLabel Le;
     private final JLabel Lcf;
     private final JLabel pic;
+    private final JLabel Ld;
+    private final JDatePickerImpl Dat;
     String emailp=null;
     Utente ug=null;
     public Profilo(Utente u) {
 
         super(String.format("Profilo di %s",u.getNome()));
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setSize(650, 700);
+        setSize(700, 700);
         setResizable(false);
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
         this.setLayout(null);
         ug=u;
         emailp=u.getEmail();
-        BufferedImage myPicture = null;
-        try {
-            myPicture = ImageIO.read(new File("C:\\Users\\Utente\\Dropbox\\Il mio PC (DESKTOP-G0JQQTD)\\Desktop\\download.jpg"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        pic= new JLabel(new ImageIcon(myPicture));
-        pic.setSize(200, 200);
-        pic.setLocation(10, 30);
+        String a = ug.getImg();
+        if(a=="")
+            a="default.png";
+        pic= new JLabel();
+        ImageIcon icon = new ImageIcon(String.format("Esame/pic/Utenti/%s",a));
+        Image image = icon.getImage();
+        Image Nimage = image.getScaledInstance(225,225, Image.SCALE_SMOOTH);
+        pic.setIcon(new ImageIcon(Nimage));
+        pic.setSize(225, 225);
+        pic.setLocation(15, 0);
         this.add(pic);
 
         Ln=new JLabel("Nome:   ");
         Ln.setFont(new Font("Arial", Font.PLAIN, 30));
         Ln.setSize(200, 30);
-        Ln.setLocation(10, 250);
+        Ln.setLocation(10, 240);
         this.add(Ln);
         TextNome = new JTextField(u.getNome());
         TextNome.setFont(new Font("Arial", Font.PLAIN, 30));
         TextNome.setSize(350, 30);
-        TextNome.setLocation(200, 250);
+        TextNome.setLocation(210, 240);
         TextNome.setEditable(false);
         this.add(TextNome);
 
         Lc=new JLabel("Cognome:   ");
         Lc.setFont(new Font("Arial", Font.PLAIN, 30));
         Lc.setSize(200, 30);
-        Lc.setLocation(10, 320);
+        Lc.setLocation(10, 290);
         this.add(Lc);
         TextCognome = new JTextField(u.getCognome());
         TextCognome.setFont(new Font("Arial", Font.PLAIN, 30));
         TextCognome.setSize(350, 30);
-        TextCognome.setLocation(200, 320);
+        TextCognome.setLocation(210, 290);
         TextCognome.setEditable(false);
         this.add(TextCognome);
+
+        Ld = new JLabel("Data di nascita");
+        Ld.setFont(new Font("Arial", Font.PLAIN, 30));
+        Ld.setLocation(10, 345);
+        Ld.setSize(200,40);
+        this.add(Ld);
+        UtilDateModel DateMod = new UtilDateModel();
+        DateMod.setDate(ug.AnnoNascita(),ug.MeseNascita(),ug.GiornoNascita());
+        DateMod.setSelected(true);
+        Properties p=new Properties();
+        p.put("text.today","Today");
+        p.put("text.month","Month");
+        p.put("text.year","Year");
+        Dat =  new JDatePickerImpl(new JDatePanelImpl(DateMod,p),new DateLabelFormatter());
+        Dat.setLocation(210, 350);
+        Dat.setSize(170,40);
+        Dat.getComponent(1).setEnabled(false);
+        this.add(Dat);
 
         Lp=new JLabel("Password:   ");
         Lp.setFont(new Font("Arial", Font.PLAIN, 30));
         Lp.setSize(200, 30);
-        Lp.setLocation(10, 390);
+        Lp.setLocation(10, 410);
         this.add(Lp);
         TextPass = new JTextField(u.getPassword());
         TextPass.setFont(new Font("Arial", Font.PLAIN, 30));
         TextPass.setSize(350, 30);
-        TextPass.setLocation(200, 390);
+        TextPass.setLocation(210, 410);
         TextPass.setEditable(false);
         this.add(TextPass);
 
         Le=new JLabel("Email:   ");
         Le.setFont(new Font("Arial", Font.PLAIN, 30));
         Le.setSize(200, 30);
-        Le.setLocation(10, 460);
+        Le.setLocation(10, 480);
         this.add(Le);
         TextEmail = new JTextField(u.getEmail());
         TextEmail.setFont(new Font("Arial", Font.PLAIN, 30));
         TextEmail.setSize(350, 30);
-        TextEmail.setLocation(200, 460);
+        TextEmail.setLocation(210, 480);
         TextEmail.setEditable(false);
         this.add(TextEmail);
 
         Lcf=new JLabel("CF:   ");
         Lcf.setFont(new Font("Arial", Font.PLAIN, 30));
         Lcf.setSize(200, 30);
-        Lcf.setLocation(10, 530);
+        Lcf.setLocation(10, 550);
         this.add(Lcf);
         TextCF = new JTextField(u.getCF());
         TextCF.setFont(new Font("Arial", Font.PLAIN, 30));
         TextCF.setSize(350, 30);
-        TextCF.setLocation(200, 530);
+        TextCF.setLocation(210, 550);
         TextCF.setEditable(false);
         this.add(TextCF);
 
@@ -153,6 +180,7 @@ public class Profilo extends JFrame implements ActionListener {
             TextCognome.setEditable(true);
             TextEmail.setEditable(true);
             TextPass.setEditable(true);
+            Dat.getComponent(1).setEnabled(true);
 
         }
         if (e.getSource() == Aggiorna) {
@@ -167,6 +195,7 @@ public class Profilo extends JFrame implements ActionListener {
                     .field("cf", TextCF.getText())
                     .field("cognome", TextCognome.getText())
                     .field("nome", TextNome.getText())
+                    .field("dataDiNascita",String.format("%d-%d-%d",Dat.getModel().getYear(),Dat.getModel().getMonth(),Dat.getModel().getDay()))
                     .asString().getBody();
 
             ug.setCF(TextCF.getText());
@@ -174,6 +203,8 @@ public class Profilo extends JFrame implements ActionListener {
             ug.setCognome(TextCognome.getText());
             ug.setEmail(TextEmail.getText());
             ug.setPassword(TextPass.getText());
+            Date data = (Date)Dat.getModel().getValue();
+            ug.setDataDiNascita(data);
             Aggiorna.setVisible(false);
             TextCF.setEditable(false);
             TextNome.setEditable(false);
@@ -181,11 +212,9 @@ public class Profilo extends JFrame implements ActionListener {
             TextEmail.setEditable(false);
             TextPass.setEditable(false);
             emailp=ug.getEmail();
+            JOptionPane.showMessageDialog(null, "Dati aggiornati correttamente");
         }
     }
 
-    public static void main(String[] args) {
-        new Esame.Profilo(new Utente());
-    }
 
 }

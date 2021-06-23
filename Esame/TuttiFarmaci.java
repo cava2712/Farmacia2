@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 import kong.unirest.Unirest;
 import spark.utils.StringUtils;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -13,6 +14,9 @@ import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -32,7 +36,7 @@ public class TuttiFarmaci extends JFrame implements ActionListener {
     private final JLabel Lca;
     private final JLabel Lp;
     private final JLabel Lq;
-    private final JLabel pic;
+    private  JLabel pic;
     private final JButton Add;
     private final JTextField Qnt;
     private final JButton Back;
@@ -41,6 +45,7 @@ public class TuttiFarmaci extends JFrame implements ActionListener {
     int cont=0;
     Object[][] farmaci;
     Utente ug;
+    JFrame f;
 
 
     ObjectMapper om = new ObjectMapper();
@@ -50,11 +55,12 @@ public class TuttiFarmaci extends JFrame implements ActionListener {
         super("Tutti i Farmaci");
         ug=u;
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setSize(800, 750);
+        setSize(800, 800);
         setResizable(false);
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
         this.setLayout(null);
+        f= this;
 
         MenuBar= new JMenuBar();
         Opzioni = new  JMenu("Opzioni");
@@ -109,10 +115,8 @@ public class TuttiFarmaci extends JFrame implements ActionListener {
 
 
         pic= new JLabel();
-        pic.setFont(new Font("Arial", Font.PLAIN, 30));
-        pic.setSize(400, 30);
-        pic.setLocation(415, 120);
-        this.add(pic);
+        pic.setLocation(415, 90);
+        f.add(pic);
 
         Lc= new JLabel();
         Lc.setFont(new Font("Arial", Font.PLAIN, 30));
@@ -173,8 +177,20 @@ public class TuttiFarmaci extends JFrame implements ActionListener {
                 Lca.setText("categoria: "+far.get(riga).getCategoria());
                 Lp.setText(String.format("prezzo: %f",far.get(riga).getPrezzo()));
                 Lq.setText(String.format("quantità: %d",far.get(riga).getQuantità()));
-                pic.setText("percorso");
+
+
+                String a = far.get(riga).getPercorsoImg();
+                if(a=="")
+                    a="default.png";
+                ImageIcon icon = new ImageIcon(String.format("Esame/pic/Farmaci/%s",a));
+                Image image = icon.getImage();
+                Image Nimage = image.getScaledInstance(300,250, Image.SCALE_SMOOTH);
+                pic.setIcon(new ImageIcon(Nimage));
+                pic.setSize(300, 250);
+                pic.setLocation(415, 50);
+                f.add(pic);
             }
+
         });
 
         Back= new JButton("Back");
@@ -210,7 +226,6 @@ public class TuttiFarmaci extends JFrame implements ActionListener {
                 return;
             }
         });
-        Carrello.addActionListener(this);
         Add.addActionListener(this);
         Back.addActionListener(this);
         Carrello.addActionListener(this);
@@ -270,6 +285,16 @@ public class TuttiFarmaci extends JFrame implements ActionListener {
                 Lp.setText(String.format("prezzo: %f",far.get(riga).getPrezzo()));
                 Lq.setText(String.format("quantità: %d",far.get(riga).getQuantità()));
                 pic.setText("percorso");
+                String a = far.get(riga).getPercorsoImg();
+                if(a=="")
+                    a="default.png";
+                ImageIcon icon = new ImageIcon(String.format("Esame/pic/Farmaci/%s",a));
+                Image image = icon.getImage();
+                Image Nimage = image.getScaledInstance(300,250, Image.SCALE_SMOOTH);
+                pic.setIcon(new ImageIcon(Nimage));
+                pic.setSize(300, 250);
+                pic.setLocation(415, 50);
+                f.add(pic);
             }
         });
 

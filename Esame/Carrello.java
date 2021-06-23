@@ -30,12 +30,14 @@ public class Carrello extends JFrame implements ActionListener {
     private final JButton Pagamento;
     private final JButton Back;
     private  JScrollPane scrol;
+    private JFrame f;
     int cont=0;
     Object[][] farmaci;
     Utente ug;
 
     public Carrello(Utente u) throws Exception {
-        super("Pagamento");
+        super("Carrello");
+        f=this;
         ug=u;
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setSize(500, 500);
@@ -64,9 +66,6 @@ public class Carrello extends JFrame implements ActionListener {
 
 
         pic= new JLabel();
-        pic.setFont(new Font("Arial", Font.PLAIN, 15));
-        pic.setSize(400, 30);
-        pic.setLocation(290, 20);
         this.add(pic);
 
         Lc= new JLabel();
@@ -128,7 +127,17 @@ public class Carrello extends JFrame implements ActionListener {
                 Lca.setText("categoria: "+u.carrello.get(riga).getCategoria());
                 Lp.setText(String.format("prezzo: %f",u.carrello.get(riga).getPrezzo()));
                 Lq.setText(String.format("quantità: %d",u.carrello.get(riga).getQuantità()));
-                pic.setText("percorso");
+
+                String a = ug.carrello.get(riga).getPercorsoImg();
+                if(a=="")
+                    a="default.png";
+                ImageIcon icon = new ImageIcon(String.format("Esame/pic/Farmaci/%s",a));
+                Image image = icon.getImage();
+                Image Nimage = image.getScaledInstance(225,145, Image.SCALE_SMOOTH);
+                pic.setIcon(new ImageIcon(Nimage));
+                pic.setSize(225, 145);
+                pic.setLocation(270, 20);
+                f.add(pic);
             }
         });
 
@@ -159,6 +168,11 @@ public class Carrello extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        if(e.getSource() == Pagamento)
+        {
+            String url = "http://localhost:8080/pagamento";
+            String json = Unirest.get(url).asString().getBody();
+        }
         if(e.getSource() == Elimina)
         {
             int riga=Table.getSelectedRow();
@@ -209,7 +223,18 @@ public class Carrello extends JFrame implements ActionListener {
                     Lca.setText("categoria: "+ug.carrello.get(riga).getCategoria());
                     Lp.setText(String.format("prezzo: %f",ug.carrello.get(riga).getPrezzo()));
                     Lq.setText(String.format("quantità: %d",ug.carrello.get(riga).getQuantità()));
-                    pic.setText("percorso");
+
+
+                    String a = ug.carrello.get(riga).getPercorsoImg();
+                    if(a=="")
+                        a="default.png";
+                    ImageIcon icon = new ImageIcon(String.format("Esame/pic/Farmaci/%s",a));
+                    Image image = icon.getImage();
+                    Image Nimage = image.getScaledInstance(225,145, Image.SCALE_SMOOTH);
+                    pic.setIcon(new ImageIcon(Nimage));
+                    pic.setSize(225, 145);
+                    pic.setLocation(270, 20);
+                    f.add(pic);
                 }
             });
             Lc.setText("");
@@ -222,13 +247,27 @@ public class Carrello extends JFrame implements ActionListener {
         }
         if(e.getSource() == Back)
         {
-            dispose();
+            this.dispose();
             new HomeCliente(ug);
         }
         if(e.getSource() == Pagamento)
         {
+            for(Farmaco f :ug.carrello)
+            {
+                String url = "http://localhost:8080/pagamento";
+                String response = Unirest.post(url)
+                        .field("codice", String.format("%s",f.getCodice()))
+                        .field("quantità", String.format("%s",f.getQuantità()))
+                        .asString().getBody();
+            }
+            JOptionPane.showMessageDialog(null, "Pagamento andato a buon fine");
+            ug.carrello.clear();
 
+
+            dispose();
+            new HomeCliente(ug);
         }
+
     }
 
 }

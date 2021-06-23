@@ -1,5 +1,7 @@
 package Esame;
 
+import java.io.File;
+
 public class Farmaco {
     private int codice,quantità;
     private String nome;

@@ -1,6 +1,8 @@
 package Esame;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 enum Types {
     cliente,
@@ -11,8 +13,12 @@ public class Utente {
     private Types t;
     private String nome,cognome,password,email,CF,img;
     public ArrayList<Farmaco> carrello;
+    public Date dataDiNascita;
+    private Calendar c;
+    public Utente ()
+    {}
 
-    public Utente(Types t, String nome, String cognome, String password, String email, String CF, String img) {
+    public Utente(Types t, String nome, String cognome, String password, String email, String CF, String img, Date dataDiNascita) {
         this.t = t;
         this.nome = nome;
         this.cognome = cognome;
@@ -20,11 +26,19 @@ public class Utente {
         this.email = email;
         this.CF = CF;
         this.img = img;
+        this.dataDiNascita = dataDiNascita;
         carrello=new ArrayList<Farmaco>();
+
     }
 
-    public Utente()
-    {}
+    public Date getDataDiNascita() {
+        return dataDiNascita;
+    }
+
+    public void setDataDiNascita(Date dataDiNascita) {
+        this.dataDiNascita = dataDiNascita;
+    }
+
     public String getImg() {
         return img;
     }
@@ -32,10 +46,7 @@ public class Utente {
     public void setImg(String img) {
         this.img = img;
     }
-    public Utente(String nome, String cognome) {
-        this.nome = nome;
-        this.cognome = cognome;
-    }
+
     public Types getT() {
         return t;
     }
@@ -83,6 +94,7 @@ public class Utente {
     public void setCF(String CF) {
         this.CF = CF;
     }
+
     @Override
     public String toString() {
         return "Utente{" +
@@ -92,8 +104,12 @@ public class Utente {
                 ", password='" + password + '\'' +
                 ", email='" + email + '\'' +
                 ", CF='" + CF + '\'' +
+                ", img='" + img + '\'' +
+                ", dataDiNascita=" + dataDiNascita +
                 '}';
     }
+
+
     public int numCarrello()
     {
         int conta=0;
@@ -103,4 +119,22 @@ public class Utente {
         return conta;
     }
 
+    public int AnnoNascita()
+    {
+        c = Calendar.getInstance();
+        c.setTime(dataDiNascita);
+        return c.get(Calendar.YEAR);
+    }
+    public int MeseNascita()
+    {
+        c = Calendar.getInstance();
+        c.setTime(dataDiNascita);
+        return c.get(Calendar.MONTH);
+    }
+    public int GiornoNascita()
+    {
+        c = Calendar.getInstance();
+        c.setTime(dataDiNascita);
+        return c.get(Calendar.DAY_OF_MONTH);
+    }
 }
