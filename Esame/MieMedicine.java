@@ -18,8 +18,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -53,16 +52,11 @@ public class MieMedicine extends JFrame implements ActionListener {
     Object[][] farmaci;
     Utente ug;
     JFrame f;
-
-
-
-    ObjectMapper om = new ObjectMapper();
-
-
-    public MieMedicine() throws Exception {
+    String[] arr2;
+    public MieMedicine(Utente u){
 
         super("Tutti i Farmaci");
-        //ug=u;
+        ug=u;
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setSize(700, 700);
         setResizable(false);
@@ -130,34 +124,6 @@ public class MieMedicine extends JFrame implements ActionListener {
         scrolD.setSize(400,290);
         this.add(scrolD);
 
-        farmaci = new Object[cont][3];
-        for(int i=0;i<cont;i++)
-        {
-            farmaci[i][0]= "adf";
-            farmaci[i][1]= "adf";
-            farmaci[i][2]= "adf";
-        }
-        Table = new JTable(farmaci,colName){
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
-        Table.setFont(new Font("Arial", Font.PLAIN, 15));
-        Table.setSize(400, 500);
-        Table.setFillsViewportHeight(true);
-        scrol=new JScrollPane(Table);
-        scrol.setLocation(5, 130);
-        scrol.setSize(250,400);
-        this.add(scrol);
-        Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-
-            }
-
-        });
-
         Back= new JButton("Back");
         Back.setFont(new Font("Arial", Font.PLAIN, 30));
         Back.setSize(140, 40);
@@ -193,7 +159,7 @@ public class MieMedicine extends JFrame implements ActionListener {
                             JOptionPane.showMessageDialog(null, "puoi inserire al massimo 500 caratteri nella descrizione");
                             try {
                                 for(int i =0; i<leng-500;i++)
-                                    Descrizione.getDocument().remove(leng-2,1);
+                                    Descrizione.getDocument().remove(leng-1-i,1);
                             } catch (BadLocationException badLocationException) {
                                 badLocationException.printStackTrace();
                             }
@@ -213,58 +179,75 @@ public class MieMedicine extends JFrame implements ActionListener {
 
             }
         });
-        setVisible(true);
-        /*
-        if(u.numCarrello() != 0)//aggiornamento lista farmaci per quando torni da un'altra finestra
-        {
-            for (Farmaco f: u.carrello)
+
+
+        try {
+            File file = new File("Esame/miemedicine.txt");    //creates a new file instance
+            FileReader fr = new FileReader(file);   //reads the file
+            BufferedReader br = new BufferedReader(fr);  //creates a buffering character input stream
+            String line;
+
+
+            while((line=br.readLine())!=null)
             {
-                far.get(f.getCodice()).setQuantità(far.get(f.getCodice()).getQuantità()-f.getQuantità());
-            }
-        }*/
-    }
-    public void modifica()
-    {
-        this.remove(scrol);
-        scrol.remove(Table);
-        int c=0;
-        ArrayList<Farmaco> lisa= new ArrayList<Farmaco>();
-        for(Farmaco f : far)
-        {
+                if(line.startsWith(ug.getEmail())) // trovata linea dell'utente e creiamo linea nuova
+                {
+                    String[] arr= line.split("☼");
+                    arr2 = arr[1].split("§");
 
+                    farmaci = new Object[arr2.length][2];
+                    for( int i =0; i< arr2.length; i++)
+                    {
+                        String[] arr3 = arr2[i].split("¶");
+                        farmaci[i][0]=arr3[0];
+                        farmaci[i][1]=arr3[1];
+                    }
+                }
+            }
+            Table = new JTable(farmaci,colName){
+                @Override
+                public boolean isCellEditable(int row, int column) {
+                    return false;
+                }
+            };
+            Table.setFont(new Font("Arial", Font.PLAIN, 15));
+            Table.setSize(250, 400);
+            Table.setFillsViewportHeight(true);
+            scrol=new JScrollPane(Table);
+            scrol.setLocation(5, 130);
+            scrol.setSize(250,400);
+            this.add(scrol);
+            Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+                @Override
+                public void valueChanged(ListSelectionEvent e) {
+                    for( int i =0; i< arr2.length; i++)
+                    {
+                        int riga=Table.getSelectedRow();
+                        if (riga==i)
+                        {
+                            String[] arr3 = arr2[i].split("¶");
+                            Header.setText(String.format("La terapia del farmaco %s inizia il %s e finisce il %s", arr3[0], arr3[2], arr3[3]));
+                            Descrizione.setText((arr3[4]));
+                        }
+                    }
+                }
+            });
+            try {
+                fr.close();
+            }
+            catch (IOException ioException)
+            {
+                ioException.printStackTrace();
+            }
+        } catch (IOException ee) {
+            ee.printStackTrace();
         }
-        farmaci = new Object[c][3];
-        for(int i=0;i<c;i++)
-        {
-            farmaci[i][0]= lisa.get(i).getCodice();
-            farmaci[i][1]= lisa.get(i).getNome();
-            farmaci[i][2]= lisa.get(i).getPrezzo();
-        }
-        Table = new JTable(farmaci,colName){
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
-
-        Table.setFont(new Font("Arial", Font.PLAIN, 15));
-        Table.setSize(400, 500);
-        Table.setFillsViewportHeight(true);
-        scrol=new JScrollPane(Table);
-        scrol.setLocation(5, 100);
-        scrol.setSize(400,500);
-        this.add(scrol);
-        Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-
-            }
-        });
-
+        setVisible(true);
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public void actionPerformed(ActionEvent e)
+    {
         if(e.getSource() == Carrello)
         {
             try {
@@ -276,12 +259,108 @@ public class MieMedicine extends JFrame implements ActionListener {
         }
 
         if (e.getSource() == BtnModifica) {
-            dispose();
-            new HomeCliente(ug);
+
+
         }
         if (e.getSource() == BtnSalva) {
+            if(DataIn.getModel().getValue()==null || DataFin.getModel().getValue()== null || Table.getSelectedRow() == -1)
+            {
+                JOptionPane.showMessageDialog(null, "Devi selezionare le date e una linea");
+                return;
+            }
+            /*
+            try {
+                File file = new File("Esame/miemedicine.txt");    //creates a new file instance
+                FileReader fr = new FileReader(file);   //reads the file
+                BufferedReader br = new BufferedReader(fr);  //creates a buffering character input stream
+
+
+                File ftmp = new File("Esame/tmp.txt");
+                FileWriter ftw = new FileWriter(ftmp);
+                FileReader ftr = new FileReader(ftmp);
+                BufferedReader btr = new BufferedReader(ftr);
+                String line;
+
+                while((line=br.readLine())!=null)
+                {
+                    if(line.startsWith(ug.getEmail())) // trovata linea dell'utente e creiamo linea nuova
+                    {
+                        for( int i =0; i< arr2.length; i++)
+                        {
+                            String[] arr3 = arr2[i].split("¶");
+                            for(Farmaco f : ug.carrello)
+                            {
+                                if(Integer.parseInt(arr3[0])==f.getCodice())
+                                {
+                                    arr3[1]= String.format("%d",f.getQuantità()+Integer.parseInt(arr3[1])) ;
+                                    fiol.add(f);
+                                    continue;
+                                }
+                            }
+                            modificata += String.format("%s¶%s¶%s¶%s¶%s§",arr3[0],arr3[1],arr3[2],arr3[3],arr3[4]);
+                        }
+                        boolean vedo=false;
+                        for (Farmaco fc :ug.carrello)
+                        {
+                            vedo=false;
+                            for(Farmaco f : fiol)
+                            {
+                                if(fc==f)
+                                    vedo=true;
+                            }
+                            if(!vedo)
+                                modificata += String.format("%s¶%s¶%s¶%s¶%s§",fc.getNome(),fc.getQuantità(),"null","null","null");
+                        }
+                        continue;
+                    }
+                    ftw.append(line+"\n");
+                }
+                if(!trovata)
+                {
+                    modificata=String.format("%s☼",ug.getEmail());
+                    for(Farmaco f : ug.carrello)
+                    {
+                        modificata += String.format("%s¶%s¶%s¶%s¶%s§",f.getNome(),f.getQuantità(),"null","null","null");
+                    }
+                }
+                ftw.append(modificata);
+
+                try {
+                    ftw.close();
+                }
+                catch (IOException ioException)
+                {
+                    ioException.printStackTrace();
+                }
+                //copia in miemedicine.txt
+                FileWriter fw = new FileWriter(file);
+                while((line=btr.readLine())!=null)
+                {
+                    fw.append(line+"\n");
+                }
+
+                FileOutputStream delatet= new FileOutputStream(ftmp);
+                delatet.write(("").getBytes());
+
+                try {
+                    delatet.close();
+                    fr.close();
+                    ftr.close();
+                    fw.close();
+                }
+                catch (IOException ioException)
+                {
+                    ioException.printStackTrace();
+                }
+
+
+            } catch (IOException ee) {
+                ee.printStackTrace();
+            }
+            */
             Date data = (Date)DataIn.getModel().getValue();
             Descrizione.setText(data.toString());
+
         }
         if (e.getSource() == Back) {
 
@@ -289,8 +368,6 @@ public class MieMedicine extends JFrame implements ActionListener {
             new HomeCliente(ug);
         }
     }
-    public static void main(String[] args) throws Exception {
-        new Esame.MieMedicine();
-    }
+
 }
 

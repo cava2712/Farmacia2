@@ -217,17 +217,14 @@ public class Registrazione extends JFrame implements ActionListener {
                     } finally {
                         try {
                             is.close();
-                        } catch (IOException ioException) {
-                            ioException.printStackTrace();
-                        }
-                        try {
                             os.close();
                         } catch (IOException ioException) {
                             ioException.printStackTrace();
                         }
                     }
                 }
-                Utente u = new Utente(Types.cliente, TextNome.getText(), String.valueOf(TextPass.getPassword()), TextCognome.getText(), TextEmail.getText(), TextCF.getText(), Pimg,data);
+
+            Utente u = new Utente(Types.cliente, TextNome.getText(), String.valueOf(TextPass.getPassword()), TextCognome.getText(), TextEmail.getText(), TextCF.getText(), Pimg,data);
 
                 dispose();
                 new HomeCliente(u);
