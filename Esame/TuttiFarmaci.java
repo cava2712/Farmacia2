@@ -51,7 +51,7 @@ public class TuttiFarmaci extends JFrame implements ActionListener {
     ObjectMapper om = new ObjectMapper();
 
 
-    public TuttiFarmaci(Utente u) throws Exception {
+    public TuttiFarmaci(Utente u,String fzero) throws Exception {
         super("Tutti i Farmaci");
         ug=u;
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -236,6 +236,11 @@ public class TuttiFarmaci extends JFrame implements ActionListener {
             {
                 far.get(f.getCodice()).setQuantità(far.get(f.getCodice()).getQuantità()-f.getQuantità());
             }
+        }
+
+        if(fzero!=null)
+        {
+            Filtra.setText(fzero);
         }
     }
     public void modifica()

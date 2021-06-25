@@ -3,6 +3,7 @@ package Esame;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import kong.unirest.Unirest;
+import org.eclipse.jetty.util.ArrayUtil;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
@@ -162,6 +163,7 @@ public class MieMedicine extends JFrame implements ActionListener {
                             int leng = Descrizione.getDocument().getLength();
 
                             JOptionPane.showMessageDialog(null, "puoi inserire al massimo 500 caratteri nella descrizione");
+
                             try {
                                 for(int i =0; i<leng-500;i++)
                                     Descrizione.getDocument().remove(leng-1-i,1);
@@ -258,6 +260,8 @@ public class MieMedicine extends JFrame implements ActionListener {
 
         if (e.getSource() == BtnModifica) {
             int riga=Table.getSelectedRow();
+            String fzero="";
+            boolean zero=false;
             if(riga==-1)
             {
                 JOptionPane.showMessageDialog(null, "nessuna riga selezionata!");
@@ -307,7 +311,10 @@ public class MieMedicine extends JFrame implements ActionListener {
                                 arr3[1] = String.format("%d",Integer.parseInt(arr3[1])-q);// modifichiamo la quantità
                                 if(Integer.parseInt(arr3[1])==0)
                                 {
+                                    zero=true;
+                                    arr2[i]=null;
                                     ric = false;
+                                    fzero=arr3[0];
                                 }
                                 if(ric) {
                                     arr2[i]= String.format("%s¶%s¶%s¶%s¶%s",arr3[0],arr3[1],arr3[2],arr3[3],arr3[4]);
@@ -357,6 +364,7 @@ public class MieMedicine extends JFrame implements ActionListener {
             } catch (IOException ee) {
                 ee.printStackTrace();
             }
+            arr2 = ArrayUtil.removeNulls(arr2);
             farmaci = new Object[arr2.length][2];
             for( int i =0; i< arr2.length; i++)
             {
@@ -385,6 +393,21 @@ public class MieMedicine extends JFrame implements ActionListener {
                     EventoTabella();
                 }
             });
+            if(zero) {
+                int result = JOptionPane.showConfirmDialog(this, String.format("Il farmaco %s è finito! \n vuoi comprarlo di nuovo?", fzero), "Attenzione!",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE);
+                if (result == JOptionPane.YES_OPTION) {
+                    dispose();
+                    try {
+                        new TuttiFarmaci(ug, fzero);
+                    } catch (Exception exception) {
+                        exception.printStackTrace();
+                    }
+                } else if (result == JOptionPane.NO_OPTION) {
+                } else {
+                }
+            }
         }
         if (e.getSource() == BtnSalva) {
             int riga=Table.getSelectedRow();
@@ -410,6 +433,10 @@ public class MieMedicine extends JFrame implements ActionListener {
                 BufferedReader btr = new BufferedReader(ftr);
                 String line;
                 String modificata="";
+                String desc = Descrizione.getText();
+                desc=desc.replace("☼","");
+                desc=desc.replace("¶","");
+                desc=desc.replace("§","");
                 while((line=br.readLine())!=null)
                 {
                     if(line.startsWith(ug.getEmail())) // trovata linea dell'utente e creiamo linea nuova
@@ -421,15 +448,15 @@ public class MieMedicine extends JFrame implements ActionListener {
                             {
                                 String[] arr3 = arr2[i].split("¶");
                                 String n= "null";
-                                if(Descrizione.getText().trim().equals(""))
+                                if(desc.trim().equals(""))
                                 {
                                     arr2[i]= String.format("%s¶%s¶%s¶%s¶%s",arr3[0],arr3[1],DataToString((Date)DataIn.getModel().getValue()),DataToString((Date)DataFin.getModel().getValue()),n);
                                     modificata += String.format("%s¶%s¶%s¶%s¶%s§",arr3[0],arr3[1],DataToString((Date)DataIn.getModel().getValue()),DataToString((Date)DataFin.getModel().getValue()),n);
                                     Header.setText(String.format("La terapia del farmaco %s inizia il %s e finisce il %s", arr3[0], DataToString((Date)DataIn.getModel().getValue()),DataToString((Date)DataFin.getModel().getValue())));
                                     continue;
                                 }
-                                arr2[i]= String.format("%s¶%s¶%s¶%s¶%s",arr3[0],arr3[1],DataToString((Date)DataIn.getModel().getValue()),DataToString((Date)DataFin.getModel().getValue()),Descrizione.getText());
-                                modificata += String.format("%s¶%s¶%s¶%s¶%s§",arr3[0],arr3[1],DataToString((Date)DataIn.getModel().getValue()),DataToString((Date)DataFin.getModel().getValue()),Descrizione.getText());
+                                arr2[i]= String.format("%s¶%s¶%s¶%s¶%s",arr3[0],arr3[1],DataToString((Date)DataIn.getModel().getValue()),DataToString((Date)DataFin.getModel().getValue()),desc);
+                                modificata += String.format("%s¶%s¶%s¶%s¶%s§",arr3[0],arr3[1],DataToString((Date)DataIn.getModel().getValue()),DataToString((Date)DataFin.getModel().getValue()),desc);
                                 Header.setText(String.format("La terapia del farmaco %s inizia il %s e finisce il %s", arr3[0], DataToString((Date)DataIn.getModel().getValue()),DataToString((Date)DataFin.getModel().getValue())));
                                 continue;
                             }
@@ -502,7 +529,6 @@ public class MieMedicine extends JFrame implements ActionListener {
             {
                 String[] arr3 = arr2[i].split("¶");
                 Header.setText(String.format("La terapia del farmaco %s inizia il %s e finisce il %s", arr3[0], arr3[2], arr3[3]));
-                arr3[4].replace('§',' ');
                 if(arr3[4].equals("null"))
                 {
                     if(arr3[2].equals("null"))

@@ -195,11 +195,12 @@ public class Profilo extends JFrame implements ActionListener {
                     .field("cf", TextCF.getText())
                     .field("cognome", TextCognome.getText())
                     .field("nome", TextNome.getText())
+                    .field("img",ug.getImg())
                     .field("dataDiNascita",String.format("%d-%d-%d",Dat.getModel().getYear(),Dat.getModel().getMonth(),Dat.getModel().getDay()))
                     .asString().getBody();
 
             ug.setCF(TextCF.getText());
-            ug.setNome(TextCF.getText());
+            ug.setNome(TextNome.getText());
             ug.setCognome(TextCognome.getText());
             ug.setEmail(TextEmail.getText());
             ug.setPassword(TextPass.getText());

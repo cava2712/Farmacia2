@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 public class Guariscimi extends JFrame implements ActionListener {
-    private final JTextField Filtra;
+    private final JComboBox Filtra;
     String[] colName= new String[] { "codice","Name" ,"Price" };
 
     private  JTable Table;
@@ -41,6 +41,7 @@ public class Guariscimi extends JFrame implements ActionListener {
     private final JTextField Qnt;
     private final JButton Back;
     ArrayList<Farmaco> far =null;
+    ArrayList<String> cat =null;
     private  JScrollPane scrol;
     int cont=0;
     Object[][] farmaci;
@@ -79,16 +80,31 @@ public class Guariscimi extends JFrame implements ActionListener {
         Lf.setLocation(415, 10);
         this.add(Lf);
 
-        Filtra = new JTextField();
+        Filtra = new JComboBox();
         Filtra.setFont(new Font("Arial", Font.PLAIN, 30));
         Filtra.setSize(400, 30);
         Filtra.setLocation(5, 10);
         this.add(Filtra);
+
         CollectionType listType =
+                om.getTypeFactory().constructCollectionType(ArrayList.class, String.class);
+        String url = "http://localhost:8080/categorie";
+        String json = Unirest.get(url).asString().getBody();
+        try {
+            cat = om.readValue(json, listType);
+        } catch (Exception e) {
+            throw new Exception(e);
+        }
+        for (String s:cat)
+        {
+            Filtra.addItem(s);
+        }
+
+        listType =
                 om.getTypeFactory().constructCollectionType(ArrayList.class, Farmaco.class);
 
-        String url = "http://localhost:8080/farmaci";
-        String json = Unirest.get(url).asString().getBody();
+        url = "http://localhost:8080/farmaci";
+        json = Unirest.get(url).asString().getBody();
         try {
             far = om.readValue(json, listType);
         } catch (Exception e) {
@@ -170,25 +186,7 @@ public class Guariscimi extends JFrame implements ActionListener {
         Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                int riga=Table.getSelectedRow();
-                Lc.setText(String.format("codice: %d",far.get(riga).getCodice()));
-                Ln.setText("nome: "+far.get(riga).getNome());
-                Lm.setText("marca: "+far.get(riga).getMarca());
-                Lca.setText("categoria: "+far.get(riga).getCategoria());
-                Lp.setText(String.format("prezzo: %f",far.get(riga).getPrezzo()));
-                Lq.setText(String.format("quantità: %d",far.get(riga).getQuantità()));
-
-
-                String a = far.get(riga).getPercorsoImg();
-                if(a=="")
-                    a="default.png";
-                ImageIcon icon = new ImageIcon(String.format("Esame/pic/Farmaci/%s",a));
-                Image image = icon.getImage();
-                Image Nimage = image.getScaledInstance(300,250, Image.SCALE_SMOOTH);
-                pic.setIcon(new ImageIcon(Nimage));
-                pic.setSize(300, 250);
-                pic.setLocation(415, 50);
-                f.add(pic);
+                EventoTabella();
             }
 
         });
@@ -210,20 +208,48 @@ public class Guariscimi extends JFrame implements ActionListener {
         Qnt.setSize(100, 40);
         Qnt.setLocation(305, 620);
         this.add(Qnt);
-        Filtra.getDocument().addDocumentListener(new DocumentListener() {
+        Filtra.addActionListener(new ActionListener() {
             @Override
-            public void insertUpdate(DocumentEvent e) {
-                modifica();
-            }
+            public void actionPerformed(ActionEvent e) {
+                cont=0;
+                ArrayList<Farmaco> fcat = new ArrayList<Farmaco>();
+                for (Farmaco f: far)
+                {
+                    if(f.getCategoria().equals(Filtra.getSelectedItem()))
+                    {
+                        fcat.add(f);
+                        cont++;
+                    }
+                }
+                farmaci = new Object[cont][3];
+                for(int i=0;i<cont;i++)
+                {
+                    farmaci[i][0]= fcat.get(i).getCodice();
+                    farmaci[i][1]= fcat.get(i).getNome();
+                    farmaci[i][2]= fcat.get(i).getPrezzo();
+                }
+                scrol.remove(Table);
+                f.remove(scrol);
+                Table = new JTable(farmaci,colName){
+                    @Override
+                    public boolean isCellEditable(int row, int column) {
+                        return false;
+                    }
+                };
+                Table.setFont(new Font("Arial", Font.PLAIN, 15));
+                Table.setSize(400, 500);
+                Table.setFillsViewportHeight(true);
+                scrol=new JScrollPane(Table);
+                scrol.setLocation(5, 100);
+                scrol.setSize(400,500);
+                f.add(scrol);
+                Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+                    @Override
+                    public void valueChanged(ListSelectionEvent e) {
+                        EventoTabella();
+                    }
 
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                modifica();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                return;
+                });
             }
         });
         Add.addActionListener(this);
@@ -238,66 +264,27 @@ public class Guariscimi extends JFrame implements ActionListener {
             }
         }
     }
-    public void modifica()
-    {
-        this.remove(scrol);
-        scrol.remove(Table);
-        String t = Filtra.getText();
-        int c=0;
-        ArrayList<Farmaco> lisa= new ArrayList<Farmaco>();
-        for(Farmaco f : far)
-        {
-            if(f.getNome().toLowerCase().startsWith(t))
-            {
-                lisa.add(f);
-                c++;
-            }
-        }
-        farmaci = new Object[c][3];
-        for(int i=0;i<c;i++)
-        {
-            farmaci[i][0]= lisa.get(i).getCodice();
-            farmaci[i][1]= lisa.get(i).getNome();
-            farmaci[i][2]= lisa.get(i).getPrezzo();
-        }
-        Table = new JTable(farmaci,colName){
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
 
-        Table.setFont(new Font("Arial", Font.PLAIN, 15));
-        Table.setSize(400, 500);
-        Table.setFillsViewportHeight(true);
-        scrol=new JScrollPane(Table);
-        scrol.setLocation(5, 100);
-        scrol.setSize(400,500);
-        this.add(scrol);
-        Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-                int riga=Table.getSelectedRow();
-                Lc.setText(String.format("codice: %d",far.get(riga).getCodice()));
-                Ln.setText("nome: "+far.get(riga).getNome());
-                Lm.setText("marca: "+far.get(riga).getMarca());
-                Lca.setText("categoria: "+far.get(riga).getCategoria());
-                Lp.setText(String.format("prezzo: %f",far.get(riga).getPrezzo()));
-                Lq.setText(String.format("quantità: %d",far.get(riga).getQuantità()));
-                pic.setText("percorso");
-                String a = far.get(riga).getPercorsoImg();
-                if(a=="")
-                    a="default.png";
-                ImageIcon icon = new ImageIcon(String.format("Esame/pic/Farmaci/%s",a));
-                Image image = icon.getImage();
-                Image Nimage = image.getScaledInstance(300,250, Image.SCALE_SMOOTH);
-                pic.setIcon(new ImageIcon(Nimage));
-                pic.setSize(300, 250);
-                pic.setLocation(415, 50);
-                f.add(pic);
-            }
-        });
+    private void EventoTabella() {
+        int riga=Table.getSelectedRow();
+        Lc.setText(String.format("codice: %d",far.get(riga).getCodice()));
+        Ln.setText("nome: "+far.get(riga).getNome());
+        Lm.setText("marca: "+far.get(riga).getMarca());
+        Lca.setText("categoria: "+far.get(riga).getCategoria());
+        Lp.setText(String.format("prezzo: %f",far.get(riga).getPrezzo()));
+        Lq.setText(String.format("quantità: %d",far.get(riga).getQuantità()));
 
+
+        String a = far.get(riga).getPercorsoImg();
+        if(a=="")
+            a="default.png";
+        ImageIcon icon = new ImageIcon(String.format("Esame/pic/Farmaci/%s",a));
+        Image image = icon.getImage();
+        Image Nimage = image.getScaledInstance(300,250, Image.SCALE_SMOOTH);
+        pic.setIcon(new ImageIcon(Nimage));
+        pic.setSize(300, 250);
+        pic.setLocation(415, 50);
+        f.add(pic);
     }
 
     @Override

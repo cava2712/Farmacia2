@@ -118,7 +118,7 @@ public class HomeCliente extends JFrame implements ActionListener {
         if (e.getSource() == BtnFarmaci) {
             dispose();
             try {
-                new TuttiFarmaci(ug);
+                new TuttiFarmaci(ug,null);
             } catch (Exception exception) {
                 exception.printStackTrace();
             }

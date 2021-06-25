@@ -99,11 +99,12 @@ public class JDBCServer {
             String emailp = request.queryParams("emailp");
             String pass = request.queryParams("password");
             String type = "cliente";
+            String img = request.queryParams("img");
             String cf = request.queryParams("cf");
             String nome = request.queryParams("nome");
             String cognome = request.queryParams("cognome");
             String dataDiNascita = request.queryParams("dataDiNascita");//-----
-            String query = String.format("UPDATE `farmacia`.`utente` SET `cf` = '%s', `nome` = '%s', `cognome` = '%s', `types` = '%s', `password` = '%s', `email` = '%s', `img` = '%s',`dataDiNascita` = '%s' WHERE (`email` = '%s')",cf,nome,cognome,type,pass,email,null,emailp,dataDiNascita);
+            String query = String.format("UPDATE `farmacia`.`utente` SET `cf` = '%s', `nome` = '%s', `cognome` = '%s', `types` = '%s', `password` = '%s', `email` = '%s', `img` = '%s',`dataDiNascita` = '%s' WHERE (`email` = '%s')",cf,nome,cognome,type,pass,email,img,dataDiNascita,emailp);
             try {
                 statement.executeUpdate(query);
             }
@@ -158,6 +159,17 @@ public class JDBCServer {
 
             }
             return l;
+        });
+
+        // GET - get all getegorie
+        // For testing: curl -X GET http://localhost:8080/categorie
+        get("/categorie", (request, response) -> {
+            ResultSet rs = statement.executeQuery("SELECT categoria FROM farmacia.farmaco group by categoria;");
+            ArrayList<String> l = new ArrayList<String>();
+            while (rs.next()) {
+                l.add(rs.getString("categoria"));
+            }
+            return om.writeValueAsString(l);
         });
 
         // GET - get all Farmaci
