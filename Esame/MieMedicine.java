@@ -21,10 +21,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Properties;
+import java.util.*;
 
 import org.jdatepicker.*;
 
@@ -46,6 +43,7 @@ public class MieMedicine extends JFrame implements ActionListener {
     private final JDatePickerImpl DataFin;
     private final JTextArea Header;
     private final JTextArea Descrizione;
+    private final JTextField Mquantità;
 
     ArrayList<Farmaco> far =null;
     int cont=0;
@@ -106,6 +104,8 @@ public class MieMedicine extends JFrame implements ActionListener {
         this.add(DataFin);
 
         Header = new JTextArea("Testo iniziale");
+        Header.setLineWrap(true);
+        Header.setWrapStyleWord(true);
         Header.setFont(new Font("Arial", Font.PLAIN, 15));
         Header.setLocation(280, 130);
         Header.setSize(400,100);
@@ -131,10 +131,15 @@ public class MieMedicine extends JFrame implements ActionListener {
         this.add(Back);
 
         BtnModifica= new JButton("Modifica Quantità");
-        BtnModifica.setFont(new Font("Arial", Font.PLAIN, 25));
-        BtnModifica.setSize(250, 40);
+        BtnModifica.setFont(new Font("Arial", Font.PLAIN, 20));
+        BtnModifica.setSize(200, 40);
         BtnModifica.setLocation(5, 550);
         this.add(BtnModifica);
+        Mquantità = new JTextField("0");
+        Mquantità.setFont(new Font("Arial", Font.PLAIN, 25));
+        Mquantità.setSize(50, 40);
+        Mquantità.setLocation(205, 550);
+        this.add(Mquantità);
 
         BtnSalva= new JButton("Salva informazioni");
         BtnSalva.setFont(new Font("Arial", Font.PLAIN, 25));
@@ -204,6 +209,8 @@ public class MieMedicine extends JFrame implements ActionListener {
                     }
                 }
             }
+            if(farmaci == null)
+                farmaci =new Object[0][2];
             Table = new JTable(farmaci,colName){
                 @Override
                 public boolean isCellEditable(int row, int column) {
@@ -220,16 +227,7 @@ public class MieMedicine extends JFrame implements ActionListener {
             Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
                 @Override
                 public void valueChanged(ListSelectionEvent e) {
-                    for( int i =0; i< arr2.length; i++)
-                    {
-                        int riga=Table.getSelectedRow();
-                        if (riga==i)
-                        {
-                            String[] arr3 = arr2[i].split("¶");
-                            Header.setText(String.format("La terapia del farmaco %s inizia il %s e finisce il %s", arr3[0], arr3[2], arr3[3]));
-                            Descrizione.setText((arr3[4]));
-                        }
-                    }
+                    EventoTabella();
                 }
             });
             try {
@@ -259,16 +257,147 @@ public class MieMedicine extends JFrame implements ActionListener {
         }
 
         if (e.getSource() == BtnModifica) {
-
-
-        }
-        if (e.getSource() == BtnSalva) {
-            if(DataIn.getModel().getValue()==null || DataFin.getModel().getValue()== null || Table.getSelectedRow() == -1)
+            int riga=Table.getSelectedRow();
+            if(riga==-1)
             {
-                JOptionPane.showMessageDialog(null, "Devi selezionare le date e una linea");
+                JOptionPane.showMessageDialog(null, "nessuna riga selezionata!");
                 return;
             }
-            /*
+            String s= Mquantità.getText();
+            int q=0;
+            try {
+                q=Integer.parseInt(s);
+            } catch(NumberFormatException ee){
+                JOptionPane.showMessageDialog(null, "devi inserire un numero!");
+                Mquantità.setText("");
+                return;
+            }
+            int a = Integer.parseInt((String) farmaci[riga][1]);
+            if( q > a)
+            {
+                JOptionPane.showMessageDialog(null, "la quantità modificata non può essere superiore alla quantità posseduta");
+                return;
+            }
+
+
+            try {
+                File file = new File("Esame/miemedicine.txt");    //creates a new file instance
+                FileReader fr = new FileReader(file);   //reads the file
+                BufferedReader br = new BufferedReader(fr);  //creates a buffering character input stream
+
+
+                File ftmp = new File("Esame/tmp.txt"); //file temporaneo
+                FileWriter ftw = new FileWriter(ftmp);
+                FileReader ftr = new FileReader(ftmp);
+                BufferedReader btr = new BufferedReader(ftr);
+                String line;
+                String modificata="";
+                boolean ric = true;
+                while((line=br.readLine())!=null)
+                {
+                    if(line.startsWith(ug.getEmail())) // trovata linea dell'utente e creiamo linea nuova
+                    {
+                        modificata=String.format("%s☼",ug.getEmail());
+                        for( int i =0; i< arr2.length; i++)
+                        {
+                            riga=Table.getSelectedRow();
+                            if (riga==i)
+                            {
+                                String[] arr3 = arr2[i].split("¶");
+                                arr3[1] = String.format("%d",Integer.parseInt(arr3[1])-q);// modifichiamo la quantità
+                                if(Integer.parseInt(arr3[1])==0)
+                                {
+                                    ric = false;
+                                }
+                                if(ric) {
+                                    arr2[i]= String.format("%s¶%s¶%s¶%s¶%s",arr3[0],arr3[1],arr3[2],arr3[3],arr3[4]);
+                                    modificata += String.format("%s¶%s¶%s¶%s¶%s§", arr3[0], arr3[1], arr3[2], arr3[3], arr3[4]);
+                                }
+                                ric=true;
+                                continue;
+                            }
+                            modificata += arr2[i]+'§';
+                        }
+                        continue;
+                    }
+                    ftw.append(line+"\n");
+                }
+
+                ftw.append(modificata);
+
+                try {
+                    ftw.close();
+                }
+                catch (IOException ioException)
+                {
+                    ioException.printStackTrace();
+                }
+                //copia in miemedicine.txt
+                FileWriter fw = new FileWriter(file);
+                while((line=btr.readLine())!=null)
+                {
+                    fw.append(line+"\n");
+                }
+
+                FileOutputStream delatet= new FileOutputStream(ftmp);
+                delatet.write(("").getBytes());
+
+                try {
+                    delatet.close();
+                    fr.close();
+                    ftr.close();
+                    fw.close();
+                }
+                catch (IOException ioException)
+                {
+                    ioException.printStackTrace();
+                }
+
+
+            } catch (IOException ee) {
+                ee.printStackTrace();
+            }
+            farmaci = new Object[arr2.length][2];
+            for( int i =0; i< arr2.length; i++)
+            {
+                String[] arr3 = arr2[i].split("¶");
+                farmaci[i][0]=arr3[0];
+                farmaci[i][1]=arr3[1];
+            }
+            scrol.remove(Table);
+            this.remove(scrol);
+            Table = new JTable(farmaci,colName){
+                @Override
+                public boolean isCellEditable(int row, int column) {
+                    return false;
+                }
+            };
+            Table.setFont(new Font("Arial", Font.PLAIN, 15));
+            Table.setSize(250, 400);
+            Table.setFillsViewportHeight(true);
+            scrol=new JScrollPane(Table);
+            scrol.setLocation(5, 130);
+            scrol.setSize(250,400);
+            this.add(scrol);
+            Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+                @Override
+                public void valueChanged(ListSelectionEvent e) {
+                    EventoTabella();
+                }
+            });
+        }
+        if (e.getSource() == BtnSalva) {
+            int riga=Table.getSelectedRow();
+            if(riga==-1 || DataIn.getModel().getValue()==null || DataFin.getModel().getValue()==null)
+            {
+                JOptionPane.showMessageDialog(null, "devi selezionare una riga e devi inserire le date");
+                return;
+            }
+            if(((Date)DataFin.getModel().getValue()).before(((Date)DataIn.getModel().getValue())))
+            {
+                JOptionPane.showMessageDialog(null, "La data iniziale deve essere precedente a quella finale");
+                return;
+            }
             try {
                 File file = new File("Esame/miemedicine.txt");    //creates a new file instance
                 FileReader fr = new FileReader(file);   //reads the file
@@ -280,48 +409,35 @@ public class MieMedicine extends JFrame implements ActionListener {
                 FileReader ftr = new FileReader(ftmp);
                 BufferedReader btr = new BufferedReader(ftr);
                 String line;
-
+                String modificata="";
                 while((line=br.readLine())!=null)
                 {
                     if(line.startsWith(ug.getEmail())) // trovata linea dell'utente e creiamo linea nuova
                     {
+                        modificata=String.format("%s☼",ug.getEmail());
                         for( int i =0; i< arr2.length; i++)
                         {
-                            String[] arr3 = arr2[i].split("¶");
-                            for(Farmaco f : ug.carrello)
+                            if (riga==i)
                             {
-                                if(Integer.parseInt(arr3[0])==f.getCodice())
+                                String[] arr3 = arr2[i].split("¶");
+                                String n= "null";
+                                if(Descrizione.getText().trim().equals(""))
                                 {
-                                    arr3[1]= String.format("%d",f.getQuantità()+Integer.parseInt(arr3[1])) ;
-                                    fiol.add(f);
+                                    arr2[i]= String.format("%s¶%s¶%s¶%s¶%s",arr3[0],arr3[1],DataToString((Date)DataIn.getModel().getValue()),DataToString((Date)DataFin.getModel().getValue()),n);
+                                    modificata += String.format("%s¶%s¶%s¶%s¶%s§",arr3[0],arr3[1],DataToString((Date)DataIn.getModel().getValue()),DataToString((Date)DataFin.getModel().getValue()),n);
+                                    Header.setText(String.format("La terapia del farmaco %s inizia il %s e finisce il %s", arr3[0], DataToString((Date)DataIn.getModel().getValue()),DataToString((Date)DataFin.getModel().getValue())));
                                     continue;
                                 }
+                                arr2[i]= String.format("%s¶%s¶%s¶%s¶%s",arr3[0],arr3[1],DataToString((Date)DataIn.getModel().getValue()),DataToString((Date)DataFin.getModel().getValue()),Descrizione.getText());
+                                modificata += String.format("%s¶%s¶%s¶%s¶%s§",arr3[0],arr3[1],DataToString((Date)DataIn.getModel().getValue()),DataToString((Date)DataFin.getModel().getValue()),Descrizione.getText());
+                                Header.setText(String.format("La terapia del farmaco %s inizia il %s e finisce il %s", arr3[0], DataToString((Date)DataIn.getModel().getValue()),DataToString((Date)DataFin.getModel().getValue())));
+                                continue;
                             }
-                            modificata += String.format("%s¶%s¶%s¶%s¶%s§",arr3[0],arr3[1],arr3[2],arr3[3],arr3[4]);
-                        }
-                        boolean vedo=false;
-                        for (Farmaco fc :ug.carrello)
-                        {
-                            vedo=false;
-                            for(Farmaco f : fiol)
-                            {
-                                if(fc==f)
-                                    vedo=true;
-                            }
-                            if(!vedo)
-                                modificata += String.format("%s¶%s¶%s¶%s¶%s§",fc.getNome(),fc.getQuantità(),"null","null","null");
+                            modificata += arr2[i]+'§';
                         }
                         continue;
                     }
                     ftw.append(line+"\n");
-                }
-                if(!trovata)
-                {
-                    modificata=String.format("%s☼",ug.getEmail());
-                    for(Farmaco f : ug.carrello)
-                    {
-                        modificata += String.format("%s¶%s¶%s¶%s¶%s§",f.getNome(),f.getQuantità(),"null","null","null");
-                    }
                 }
                 ftw.append(modificata);
 
@@ -357,15 +473,60 @@ public class MieMedicine extends JFrame implements ActionListener {
             } catch (IOException ee) {
                 ee.printStackTrace();
             }
-            */
-            Date data = (Date)DataIn.getModel().getValue();
-            Descrizione.setText(data.toString());
-
+            DataIn.getModel().setSelected(false);
+            DataFin.getModel().setSelected(false);
+            Header.setText("");
+            Descrizione.setText("");
         }
         if (e.getSource() == Back) {
 
             dispose();
             new HomeCliente(ug);
+        }
+    }
+    public String DataToString ( Date d)
+    {
+        Calendar c = Calendar.getInstance();
+        c.setTime(d);
+        return String.format("%s-%s-%s",c.get(Calendar.YEAR),c.get(Calendar.MONTH),c.get(Calendar.DAY_OF_MONTH));
+    }
+    public void EventoTabella()
+    {
+        Descrizione.setText("");
+        DataIn.getModel().setSelected(false);
+        DataFin.getModel().setSelected(false);
+        for( int i =0; i< arr2.length; i++)
+        {
+            int riga=Table.getSelectedRow();
+            if (riga==i)
+            {
+                String[] arr3 = arr2[i].split("¶");
+                Header.setText(String.format("La terapia del farmaco %s inizia il %s e finisce il %s", arr3[0], arr3[2], arr3[3]));
+                arr3[4].replace('§',' ');
+                if(arr3[4].equals("null"))
+                {
+                    if(arr3[2].equals("null"))
+                    {
+                        Header.setText(String.format("La terapia del farmaco %s inizia il NON DEFINITO e finisce il NON DEFINITO", arr3[0]));
+                    }
+                    Descrizione.setText("");
+                    return;
+                }
+                if(arr3[2].equals("null"))
+                {
+                    Header.setText(String.format("La terapia del farmaco %s inizia il NON DEFINITO e finisce il NON DEFINITO", arr3[0]));
+                    return;
+                }
+
+                Descrizione.setText((arr3[4]));
+                String[] dataIn = arr3[2].split("-");
+                String[] dataFin = arr3[3].split("-");
+                DataIn.getModel().setDate(Integer.parseInt(dataIn[0]),Integer.parseInt(dataIn[1]),Integer.parseInt(dataIn[2]));
+                DataFin.getModel().setDate(Integer.parseInt(dataFin[0]),Integer.parseInt(dataFin[1]),Integer.parseInt(dataFin[2]));
+                DataIn.getModel().setSelected(true);
+                DataFin.getModel().setSelected(true);
+                return;
+            }
         }
     }
 

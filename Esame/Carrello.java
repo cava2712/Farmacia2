@@ -283,7 +283,7 @@ public class Carrello extends JFrame implements ActionListener {
                             String[] arr3 = arr2[i].split("¶");
                             for(Farmaco f : ug.carrello)
                             {
-                                if(Integer.parseInt(arr3[0])==f.getCodice())
+                                if(arr3[0].equals(f.getNome()))
                                 {
                                     arr3[1]= String.format("%d",f.getQuantità()+Integer.parseInt(arr3[1])) ;
                                     fiol.add(f);
