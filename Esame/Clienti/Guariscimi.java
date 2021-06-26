@@ -1,24 +1,18 @@
-package Esame;
+package Esame.Clienti;
 
+import Esame.Classi.Farmaco;
+import Esame.Classi.Utente;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import kong.unirest.Unirest;
-import spark.utils.StringUtils;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Locale;
 
 public class Guariscimi extends JFrame implements ActionListener {
     private final JComboBox Filtra;

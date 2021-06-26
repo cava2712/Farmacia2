@@ -1,19 +1,19 @@
-package Esame;
+package Esame.Clienti;
 
+import Esame.Classi.DateLabelFormatter;
+import Esame.Classi.Utente;
 import kong.unirest.Unirest;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.time.LocalDateTime;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.io.*;
 import java.util.Date;
 import java.util.Properties;
 
@@ -26,16 +26,21 @@ public class Profilo extends JFrame implements ActionListener {
     private final JButton BtnBack;
     private final JButton Modifica;
     private final JButton Aggiorna;
+    private final JButton ModificaImmagine;
+    private final JLabel Mi;
     private final JLabel Ln;
     private final JLabel Lp;
     private final JLabel Lc;
     private final JLabel Le;
     private final JLabel Lcf;
-    private final JLabel pic;
+    private  JLabel pic;
     private final JLabel Ld;
     private final JDatePickerImpl Dat;
+    private final JCheckBox CBO;
     String emailp=null;
     Utente ug=null;
+    String path = null;
+    String Pimg = null;
     public Profilo(Utente u) {
 
         super(String.format("Profilo di %s",u.getNome()));
@@ -47,11 +52,46 @@ public class Profilo extends JFrame implements ActionListener {
         this.setLayout(null);
         ug=u;
         emailp=u.getEmail();
-        String a = ug.getImg();
-        if(a=="")
-            a="default.png";
+        ModificaImmagine=new JButton("Scegli un'altra immagine");
+        ModificaImmagine.setFont(new Font("Arial", Font.PLAIN, 15));
+        ModificaImmagine.setSize(200, 30);
+        ModificaImmagine.setLocation(250, 50);
+        this.add(ModificaImmagine);
+        Mi = new JLabel(ug.getImg());
+        Mi.setFont(new Font("Arial", Font.PLAIN, 15));
+        Mi.setSize(200, 30);
+        Mi.setLocation(460, 50);
+        this.add( Mi);
+
+        CBO=new JCheckBox("Scegli immagine di default");
+        CBO.setFont(new Font("Arial", Font.PLAIN, 30));
+        CBO.setSize(400, 45);
+        CBO.setLocation(250, 100);
+        this.add(CBO);
+        CBO.addItemListener(new ItemListener(){
+
+            @Override
+            public void itemStateChanged(ItemEvent e)
+            {
+                if(CBO.isSelected())
+                {
+                    Mi.setText("default");
+                    Mi.setVisible(false);
+                    ModificaImmagine.setEnabled(false);
+                }
+                else
+                {
+                    ModificaImmagine.setEnabled(true);
+                    Mi.setText("");
+                    Mi.setVisible(true);
+                }
+            }
+        });
+
+        if(ug.getImg()=="")
+            ug.setImg("default.png");
         pic= new JLabel();
-        ImageIcon icon = new ImageIcon(String.format("Esame/pic/Utenti/%s",a));
+        ImageIcon icon = new ImageIcon(String.format("Esame/pic/Utenti/%s",ug.getImg()));
         Image image = icon.getImage();
         Image Nimage = image.getScaledInstance(225,225, Image.SCALE_SMOOTH);
         pic.setIcon(new ImageIcon(Nimage));
@@ -154,13 +194,15 @@ public class Profilo extends JFrame implements ActionListener {
         Aggiorna.setSize(150, 60);
         Aggiorna.setLocation(450, 600);
         Aggiorna.setVisible(false);
-
         this.add(Aggiorna);
-        
+
+        ModificaImmagine.setEnabled(false);
+        CBO.setEnabled(false);
 
         BtnBack.addActionListener(this);
         Modifica.addActionListener(this);
         Aggiorna.addActionListener(this);
+        ModificaImmagine.addActionListener(this);
 
         setVisible(true);
 
@@ -168,6 +210,15 @@ public class Profilo extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        if(e.getSource() == ModificaImmagine) {
+
+            JFileChooser open = new JFileChooser();
+            int option = open.showOpenDialog(this);
+            if (option == JFileChooser.APPROVE_OPTION) {
+                path = open.getSelectedFile().getAbsolutePath();
+                Mi.setText(path);
+            }
+        }
         if (e.getSource() == BtnBack) {
 
             dispose();
@@ -181,12 +232,24 @@ public class Profilo extends JFrame implements ActionListener {
             TextEmail.setEditable(true);
             TextPass.setEditable(true);
             Dat.getComponent(1).setEnabled(true);
+            ModificaImmagine.setEnabled(true);
+            CBO.setEnabled(true);
+            if(ug.getImg().equals("default.png"))
+                CBO.setSelected(true);
 
         }
         if (e.getSource() == Aggiorna) {
             //qua prendiamo i dati e poi facciamo la query
             String url = "http://localhost:8080/aggiorna";
-
+            if(CBO.isSelected())
+            {
+                Pimg= "default.png";
+            }
+            else
+            {
+                Pimg= String.format("%s.png", TextEmail.getText());
+            }
+            ug.setImg(Pimg);
             String response = Unirest.post(url)
                     .field("types", "cliente")
                     .field("emailp",emailp)
@@ -196,7 +259,7 @@ public class Profilo extends JFrame implements ActionListener {
                     .field("cognome", TextCognome.getText())
                     .field("nome", TextNome.getText())
                     .field("img",ug.getImg())
-                    .field("dataDiNascita",String.format("%d-%d-%d",Dat.getModel().getYear(),Dat.getModel().getMonth(),Dat.getModel().getDay()))
+                    .field("dataDiNascita",String.format("%d-%d-%d",Dat.getModel().getYear(),Dat.getModel().getMonth()+1,Dat.getModel().getDay()))
                     .asString().getBody();
 
             ug.setCF(TextCF.getText());
@@ -214,6 +277,40 @@ public class Profilo extends JFrame implements ActionListener {
             TextPass.setEditable(false);
             emailp=ug.getEmail();
             JOptionPane.showMessageDialog(null, "Dati aggiornati correttamente");
+
+            InputStream is = null;
+            OutputStream os = null;
+            if(!CBO.isSelected() && path!=null) {
+                try {
+                    is = new FileInputStream(new File(path));
+                    os = new FileOutputStream(new File(String.format("Esame/pic/Utenti/%s.png", TextEmail.getText())));
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = is.read(buffer)) > 0) {
+                        os.write(buffer, 0, length);
+                    }
+                } catch (FileNotFoundException fileNotFoundException) {
+                    fileNotFoundException.printStackTrace();
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                } finally {
+                    try {
+                        is.close();
+                        os.close();
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                    }
+                }
+
+
+            }
+            String a = ug.getImg();
+            ImageIcon icon = new ImageIcon(String.format("Esame/pic/Utenti/%s",a));
+            Image image = icon.getImage();
+            Image Nimage = image.getScaledInstance(225,225, Image.SCALE_SMOOTH);
+            pic.setIcon(new ImageIcon(Nimage));
+            ModificaImmagine.setEnabled(false);
+            CBO.setEnabled(false);
         }
     }
 

@@ -1,4 +1,7 @@
-package Esame;
+package Esame.Farmacisti;
+import Esame.Classi.Utente;
+import Esame.Login.loginInterface;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -17,7 +20,7 @@ public class HomeFarmacista extends JFrame implements ActionListener {
     private final JMenuItem Disconnetti,Profilo;
 
 
-    public HomeFarmacista(String nomeUtente,String passUtente) {
+    public HomeFarmacista(Utente u) {
         super("HOME");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setSize(800, 700);
@@ -61,15 +64,20 @@ public class HomeFarmacista extends JFrame implements ActionListener {
         BtnDisc.setSize(200,50);
         BtnDisc.setLocation(545,550);
         this.add(BtnDisc);
+        BtnDisc.addActionListener(this);
         setVisible(true);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
+        if (e.getSource() == BtnDisc) {
+            dispose();
+            new loginInterface();
+        }
     }
 
     public static void main(String[] args) {
-        new Esame.HomeFarmacista("davide","figo");
+        new HomeFarmacista(new Utente());
+
     }
 }

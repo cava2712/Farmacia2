@@ -1,20 +1,18 @@
-package Esame;
+package Esame.Login;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
+import Esame.Clienti.HomeCliente;
+import Esame.Classi.Types;
+import Esame.Classi.Utente;
+import Esame.Farmacisti.HomeFarmacista;
 import kong.unirest.Unirest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 public class loginInterface extends JFrame implements ActionListener
 {
-    static boolean ser=true;
     private final JRadioButton RadioFarmacista;
     private final JRadioButton RadioCliente;
     private final JRadioButton RadioAmministratore;
@@ -147,10 +145,6 @@ public class loginInterface extends JFrame implements ActionListener
         BtnLogin.addActionListener(this);
         Lreg.addActionListener(this);
         Newpass.addActionListener(this);
-        if(ser) {
-            new JDBCServer().run();
-            ser=false;
-        }
     }
 
 
@@ -188,7 +182,13 @@ public class loginInterface extends JFrame implements ActionListener
             dispose();
             //controllo esiste cliente
 
-            new HomeCliente(u);
+            if(u.getT()== Types.cliente)
+                new HomeCliente(u);
+            else if(u.getT()== Types.farmacista)
+                new HomeFarmacista(u);
+            //else
+                // new HomeAmministratore(u);
+
         }
         if(e.getSource() == Lreg)
         {
@@ -203,6 +203,6 @@ public class loginInterface extends JFrame implements ActionListener
     }
 
     public static void main(String[] args) {
-        new Esame.loginInterface();
+        new loginInterface();
     }
 }

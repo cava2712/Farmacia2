@@ -1,14 +1,9 @@
-package Esame;
+package Esame.Classi;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
-enum Types {
-    cliente,
-    farmacista,
-    amministratore
-}
 public class Utente {
     private Types t;
     private String nome,cognome,password,email,CF,img;

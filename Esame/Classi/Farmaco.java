@@ -1,4 +1,4 @@
-package Esame;
+package Esame.Classi;
 
 import java.io.File;
 

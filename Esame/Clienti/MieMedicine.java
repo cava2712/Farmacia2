@@ -1,14 +1,13 @@
-package Esame;
+package Esame.Clienti;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.CollectionType;
-import kong.unirest.Unirest;
+import Esame.Classi.DateLabelFormatter;
+import Esame.Classi.Farmaco;
+import Esame.Classi.Utente;
 import org.eclipse.jetty.util.ArrayUtil;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
-import spark.utils.StringUtils;
-import javax.imageio.ImageIO;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -18,13 +17,9 @@ import javax.swing.text.BadLocationException;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
 import java.io.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-
-import org.jdatepicker.*;
 
 public class MieMedicine extends JFrame implements ActionListener {
     String[] colName= new String[] { "NomeProdotto","Quantità"};
@@ -189,7 +184,7 @@ public class MieMedicine extends JFrame implements ActionListener {
 
 
         try {
-            File file = new File("Esame/miemedicine.txt");    //creates a new file instance
+            File file = new File("Esame/FIle/miemedicine.txt");    //creates a new file instance
             FileReader fr = new FileReader(file);   //reads the file
             BufferedReader br = new BufferedReader(fr);  //creates a buffering character input stream
             String line;
@@ -285,12 +280,12 @@ public class MieMedicine extends JFrame implements ActionListener {
 
 
             try {
-                File file = new File("Esame/miemedicine.txt");    //creates a new file instance
+                File file = new File("Esame/FIle/miemedicine.txt");    //creates a new file instance
                 FileReader fr = new FileReader(file);   //reads the file
                 BufferedReader br = new BufferedReader(fr);  //creates a buffering character input stream
 
 
-                File ftmp = new File("Esame/tmp.txt"); //file temporaneo
+                File ftmp = new File("Esame/FIle/tmp.txt"); //file temporaneo
                 FileWriter ftw = new FileWriter(ftmp);
                 FileReader ftr = new FileReader(ftmp);
                 BufferedReader btr = new BufferedReader(ftr);
@@ -422,12 +417,12 @@ public class MieMedicine extends JFrame implements ActionListener {
                 return;
             }
             try {
-                File file = new File("Esame/miemedicine.txt");    //creates a new file instance
+                File file = new File("Esame/FIle/miemedicine.txt");    //creates a new file instance
                 FileReader fr = new FileReader(file);   //reads the file
                 BufferedReader br = new BufferedReader(fr);  //creates a buffering character input stream
 
 
-                File ftmp = new File("Esame/tmp.txt");
+                File ftmp = new File("Esame/FIle/tmp.txt");
                 FileWriter ftw = new FileWriter(ftmp);
                 FileReader ftr = new FileReader(ftmp);
                 BufferedReader btr = new BufferedReader(ftr);

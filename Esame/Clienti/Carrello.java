@@ -1,12 +1,10 @@
-package Esame;
+package Esame.Clienti;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.CollectionType;
+import Esame.Classi.Farmaco;
+import Esame.Classi.Utente;
 import kong.unirest.Unirest;
-import spark.utils.StringUtils;
+
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
@@ -14,7 +12,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Locale;
 
 public class Carrello extends JFrame implements ActionListener {
     String[] colName= new String[] { "Nome","Categoria" ,"Quantità" };
@@ -256,12 +253,12 @@ public class Carrello extends JFrame implements ActionListener {
             JOptionPane.showMessageDialog(null, "Pagamento andato a buon fine");
 
             try {
-                File file = new File("Esame/miemedicine.txt");    //creates a new file instance
+                File file = new File("Esame/FIle/miemedicine.txt");    //creates a new file instance
                 FileReader fr = new FileReader(file);   //reads the file
                 BufferedReader br = new BufferedReader(fr);  //creates a buffering character input stream
 
 
-                File ftmp = new File("Esame/tmp.txt");
+                File ftmp = new File("Esame/FIle/tmp.txt");
                 FileWriter ftw = new FileWriter(ftmp);
                 FileReader ftr = new FileReader(ftmp);
                 BufferedReader btr = new BufferedReader(ftr);

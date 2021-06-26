@@ -1,5 +1,9 @@
-package Esame;
+package Esame.Login;
 
+import Esame.Classi.DateLabelFormatter;
+import Esame.Clienti.HomeCliente;
+import Esame.Classi.Types;
+import Esame.Classi.Utente;
 import kong.unirest.Unirest;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
@@ -12,9 +16,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.*;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
 
@@ -246,7 +248,7 @@ public class Registrazione extends JFrame implements ActionListener {
     }
 
     public static void main(String[] args) {
-        new Esame.Registrazione();
+        new Registrazione();
     }
 
 }

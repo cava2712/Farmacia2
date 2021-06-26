@@ -1,15 +1,11 @@
-package Esame;
+package Esame.Login;
 
 import kong.unirest.Unirest;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 
 public class ModPass extends JFrame implements ActionListener {
     private final JTextField TextEmail;
@@ -18,9 +14,6 @@ public class ModPass extends JFrame implements ActionListener {
     private final JLabel Le;
     private final JLabel Lnp;
     public ModPass() {
-
-
-
         super("Modifica password");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setSize(400, 400);
@@ -89,6 +82,6 @@ public class ModPass extends JFrame implements ActionListener {
     }
 
     public static void main(String[] args) {
-        new Esame.ModPass();
+        new ModPass();
     }
 }
