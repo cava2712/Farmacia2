@@ -1,5 +1,6 @@
 package Esame.Farmacisti;
 import Esame.Classi.Utente;
+import Esame.Clienti.ProfiloF;
 import Esame.Login.loginInterface;
 
 import javax.swing.*;
@@ -14,10 +15,7 @@ public class HomeFarmacista extends JFrame implements ActionListener {
     private final JButton BtnRicetta;
     private final JButton BtnProfilo;
     private final JButton BtnDisc;
-    private final JMenuBar MenuBar;
-    private final JMenu Opzioni;
-    private final JMenu Carrello;
-    private final JMenuItem Disconnetti,Profilo;
+    Utente ug;
 
 
     public HomeFarmacista(Utente u) {
@@ -28,17 +26,7 @@ public class HomeFarmacista extends JFrame implements ActionListener {
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
         this.setLayout(null);
-
-        MenuBar= new JMenuBar();
-        Opzioni = new  JMenu("opzioni");
-        Carrello = new  JMenu("Carrello");
-        Disconnetti= new JMenuItem("Disconnetiti");
-        Profilo= new JMenuItem(("profilo"));
-        MenuBar.add(Opzioni);
-        MenuBar.add(Carrello);
-        Opzioni.add(Disconnetti);
-        Opzioni.add(Profilo);
-        this.setJMenuBar(MenuBar);
+        ug=u;
 
         BtnMag = new JButton("Gestisci Magazino");
         BtnMag.setSize(200,200);
@@ -65,6 +53,8 @@ public class HomeFarmacista extends JFrame implements ActionListener {
         BtnDisc.setLocation(545,550);
         this.add(BtnDisc);
         BtnDisc.addActionListener(this);
+        BtnMag.addActionListener(this);
+        BtnProfilo.addActionListener(this);
         setVisible(true);
     }
 
@@ -73,6 +63,18 @@ public class HomeFarmacista extends JFrame implements ActionListener {
         if (e.getSource() == BtnDisc) {
             dispose();
             new loginInterface();
+        }
+        if (e.getSource() == BtnMag) {
+            dispose();
+            try {
+                new GestisciMag(ug);
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+        }
+        if (e.getSource() == BtnProfilo) {
+            dispose();
+            new ProfiloF(ug);
         }
     }
 
