@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
 
+import Esame.Amministratore.HomeAmministratore;
 import Esame.Clienti.HomeCliente;
 import Esame.Classi.Types;
 import Esame.Classi.Utente;
@@ -186,8 +187,13 @@ public class loginInterface extends JFrame implements ActionListener
                 new HomeCliente(u);
             else if(u.getT()== Types.farmacista)
                 new HomeFarmacista(u);
-            //else
-                // new HomeAmministratore(u);
+            else {
+                try {
+                    new HomeAmministratore(u);
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
+            }
 
         }
         if(e.getSource() == Lreg)

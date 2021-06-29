@@ -38,7 +38,6 @@ public class TuttiFarmaci extends JFrame implements ActionListener {
     private final JButton Back;
     ArrayList<Farmaco> far =null;
     private  JScrollPane scrol;
-    int cont=0;
     Object[][] farmaci;
     Utente ug;
     JFrame f;
@@ -91,12 +90,8 @@ public class TuttiFarmaci extends JFrame implements ActionListener {
             throw new Exception(e);
         }
 
-        for (Farmaco f: far)
-        {
-            cont++;
-        }
-        farmaci = new Object[cont][3];
-        for(int i=0;i<cont;i++)
+        farmaci = new Object[far.size()][3];
+        for(int i=0;i<far.size();i++)
         {
             farmaci[i][0]= far.get(i).getCodice();
             farmaci[i][1]= far.get(i).getNome();
@@ -171,7 +166,7 @@ public class TuttiFarmaci extends JFrame implements ActionListener {
                 Ln.setText("nome: "+far.get(riga).getNome());
                 Lm.setText("marca: "+far.get(riga).getMarca());
                 Lca.setText("categoria: "+far.get(riga).getCategoria());
-                Lp.setText(String.format("prezzo: %f",far.get(riga).getPrezzo()));
+                Lp.setText(String.format("prezzo: %.2f",far.get(riga).getPrezzo()));
                 Lq.setText(String.format("quantità: %d",far.get(riga).getQuantità()));
 
 
@@ -283,7 +278,7 @@ public class TuttiFarmaci extends JFrame implements ActionListener {
                 Ln.setText("nome: "+far.get(riga).getNome());
                 Lm.setText("marca: "+far.get(riga).getMarca());
                 Lca.setText("categoria: "+far.get(riga).getCategoria());
-                Lp.setText(String.format("prezzo: %f",far.get(riga).getPrezzo()));
+                Lp.setText(String.format("prezzo: %.2f",far.get(riga).getPrezzo()));
                 Lq.setText(String.format("quantità: %d",far.get(riga).getQuantità()));
                 pic.setText("percorso");
                 String a = far.get(riga).getPercorsoImg();
