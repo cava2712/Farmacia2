@@ -9,11 +9,21 @@ public class Farmaco {
     private String categoria;
     private String percorsoImg;
     private float prezzo;
+    private String ricetta;
+
+    public String getRicetta() {
+        return ricetta;
+    }
+
+    public void setRicetta(String ricetta) {
+        this.ricetta = ricetta;
+    }
+
     public Farmaco()
     {
 
     }
-    public Farmaco(int codice, int quantità, String nome, String marca, String categoria, float prezzo,String percorsoImg) {
+    public Farmaco(int codice, int quantità, String nome, String marca, String categoria, float prezzo,String percorsoImg,String ricetta) {
         this.codice = codice;
         this.quantità = quantità;
         this.nome = nome;
@@ -21,6 +31,7 @@ public class Farmaco {
         this.categoria = categoria;
         this.prezzo = prezzo;
         this.percorsoImg=percorsoImg;
+        this.ricetta=ricetta;
     }
     public String getPercorsoImg() {
         return percorsoImg;

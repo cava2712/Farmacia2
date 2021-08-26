@@ -28,6 +28,7 @@ public class GestisciMag extends JFrame implements ActionListener {
     private final JLabel Lca;
     private final JLabel Lp;
     private final JLabel Lq;
+    private final  JLabel Lr;
     private final JTextField Textc;
     private final JTextField Textn;
     private final JTextField Textm;
@@ -173,6 +174,12 @@ public class GestisciMag extends JFrame implements ActionListener {
         Textq.setEditable(false);
         this.add(Textq);
 
+        Lr= new JLabel("Ricetta:");
+        Lr.setFont(new Font("Arial", Font.PLAIN, 30));
+        Lr.setSize(450, 30);
+        Lr.setLocation(415, 600);
+        this.add(Lr);
+
 
         Table.setFont(new Font("Arial", Font.PLAIN, 15));
         Table.setSize(400, 500);
@@ -191,8 +198,10 @@ public class GestisciMag extends JFrame implements ActionListener {
                 Textca.setText(far.get(riga).getCategoria());
                 Textp.setText(String.format("%.2f",far.get(riga).getPrezzo()));
                 Textq.setText(String.format("%d",far.get(riga).getQuantità()));
-
-
+                if(far.get(riga).getRicetta().compareTo("true")==0)
+                    Lr.setText("Ricetta: necessaria");
+                else
+                    Lr.setText("Ricetta: non necessaria");
                 String a = far.get(riga).getPercorsoImg();
                 if(a=="")
                     a="default.png";
@@ -369,6 +378,7 @@ public class GestisciMag extends JFrame implements ActionListener {
                     .field("prezzo",String.format("%.2f",Float.parseFloat(Textp.getText().replace(',','.'))))
                     .field("quantità", Textq.getText())
                     .field("codice", Textc.getText())
+                    .field("ricetta", far.get(riga).getRicetta())
                     .asString().getBody();
             far.get(riga).setCategoria( Textca.getText());
             far.get(riga).setPrezzo(Float.parseFloat(Textp.getText().replace(',','.')));
@@ -409,7 +419,10 @@ public class GestisciMag extends JFrame implements ActionListener {
                     Textca.setText(far.get(riga).getCategoria());
                     Textp.setText(String.format("%.2f",far.get(riga).getPrezzo()));
                     Textq.setText(String.format("%d",far.get(riga).getQuantità()));
-
+                    if(far.get(riga).getRicetta().compareTo("true")==0)
+                        Lr.setText("Ricetta: necessaria");
+                    else
+                        Lr.setText("Ricetta: non necessaria");
 
                     String a = far.get(riga).getPercorsoImg();
                     if(a=="")
@@ -475,6 +488,7 @@ public class GestisciMag extends JFrame implements ActionListener {
             scrol.setLocation(5, 100);
             scrol.setSize(400,500);
             this.add(scrol);
+
             Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
                 @Override
                 public void valueChanged(ListSelectionEvent e) {
@@ -485,7 +499,10 @@ public class GestisciMag extends JFrame implements ActionListener {
                     Textca.setText(far.get(riga).getCategoria());
                     Textp.setText(String.format("%.2f",far.get(riga).getPrezzo()));
                     Textq.setText(String.format("%d",far.get(riga).getQuantità()));
-
+                    if(far.get(riga).getRicetta().compareTo("true")==0)
+                        Lr.setText("Ricetta: necessaria");
+                    else
+                        Lr.setText("Ricetta: non necessaria");
 
                     String a = far.get(riga).getPercorsoImg();
                     if(a=="")

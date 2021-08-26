@@ -12,6 +12,8 @@ import Esame.Classi.Utente;
 import Esame.Farmacisti.HomeFarmacista;
 import kong.unirest.Unirest;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+
 public class loginInterface extends JFrame implements ActionListener
 {
     private final JRadioButton RadioFarmacista;
@@ -31,8 +33,6 @@ public class loginInterface extends JFrame implements ActionListener
     private final JLabel Lp;
     private final JLabel Ln;
     private final JLabel Ls;
-
-
     ObjectMapper om = new ObjectMapper();
 
     public loginInterface() {
@@ -151,6 +151,7 @@ public class loginInterface extends JFrame implements ActionListener
 
     @Override
     public void actionPerformed(ActionEvent e) {
+
         if (e.getSource() == BtnLogin) {
             //qua prendiamo i dati e poi facciamo la query
 

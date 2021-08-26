@@ -30,6 +30,7 @@ public class Guariscimi extends JFrame implements ActionListener {
     private final JLabel Lca;
     private final JLabel Lp;
     private final JLabel Lq;
+    private final JLabel Lr;
     private  JLabel pic;
     private final JButton Add;
     private final JTextField Qnt;
@@ -169,6 +170,12 @@ public class Guariscimi extends JFrame implements ActionListener {
         Lq.setLocation(415, 550);
         this.add(Lq);
 
+        Lr= new JLabel();
+        Lr.setFont(new Font("Arial", Font.PLAIN, 30));
+        Lr.setSize(400, 30);
+        Lr.setLocation(415, 600);
+        this.add(Lr);
+
 
         Table.setFont(new Font("Arial", Font.PLAIN, 15));
         Table.setSize(400, 500);
@@ -188,19 +195,19 @@ public class Guariscimi extends JFrame implements ActionListener {
         Back= new JButton("Back");
         Back.setFont(new Font("Arial", Font.PLAIN, 30));
         Back.setSize(200, 40);
-        Back.setLocation(600, 620);
+        Back.setLocation(600, 650);
         this.add(Back);
 
         Add= new JButton("Aggiungi al Carrello");
         Add.setFont(new Font("Arial", Font.PLAIN, 30));
         Add.setSize(300, 40);
-        Add.setLocation(5, 620);
+        Add.setLocation(5, 650);
         this.add(Add);
 
         Qnt= new JTextField("0");
         Qnt.setFont(new Font("Arial", Font.PLAIN, 30));
         Qnt.setSize(100, 40);
-        Qnt.setLocation(305, 620);
+        Qnt.setLocation(305, 650);
         this.add(Qnt);
         Filtra.addActionListener(new ActionListener() {
             @Override
@@ -267,7 +274,10 @@ public class Guariscimi extends JFrame implements ActionListener {
         Lca.setText("categoria: "+far.get(riga).getCategoria());
         Lp.setText(String.format("prezzo: %f",far.get(riga).getPrezzo()));
         Lq.setText(String.format("quantità: %d",far.get(riga).getQuantità()));
-
+        if(far.get(riga).getRicetta().compareTo("true")==0)
+            Lr.setText("Ricetta: necessaria");
+        else
+            Lr.setText("Ricetta: non necessaria");
 
         String a = far.get(riga).getPercorsoImg();
         if(a=="")

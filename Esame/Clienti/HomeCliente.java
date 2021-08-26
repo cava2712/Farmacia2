@@ -82,6 +82,7 @@ public class HomeCliente extends JFrame implements ActionListener {
         BtnFarmaci.addActionListener(this);
         BtnGuariscimi.addActionListener(this);
         BtnMed.addActionListener(this);
+        BtnRicetta.addActionListener(this);
         Carrello.addActionListener(this);
         setVisible(true);
     }
@@ -95,6 +96,10 @@ public class HomeCliente extends JFrame implements ActionListener {
         if (e.getSource() == BtnMed) {
             dispose();
             new MieMedicine(ug);
+        }
+        if (e.getSource() == BtnRicetta) {
+            dispose();
+            new ImmettiRicetta(ug);
         }
         if (e.getSource() == Carrello) {
             try {

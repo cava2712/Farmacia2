@@ -33,6 +33,7 @@ public class NuovoFarmaco extends JFrame implements ActionListener {
     private  JLabel pic;
     private final JLabel Mi;
     private final JCheckBox CBO;
+    private final JCheckBox CBR;
     String path = null;
     String Pimg = null;
     Utente ug;
@@ -109,6 +110,12 @@ public class NuovoFarmaco extends JFrame implements ActionListener {
         Textn.setSize(200, 30);
         Textn.setLocation(170, 350);
         this.add(Textn);
+
+        CBR=new JCheckBox("Necessita ricetta?");
+        CBR.setFont(new Font("Arial", Font.PLAIN, 15));
+        CBR.setSize(300, 15);
+        CBR.setLocation(370, 350);
+        this.add(CBR);
 
         Lm= new JLabel("Marca:");
         Lm.setFont(new Font("Arial", Font.PLAIN, 30));
@@ -211,6 +218,9 @@ public class NuovoFarmaco extends JFrame implements ActionListener {
                 Textq.setText("");
                 return;
             }
+            String ricetta="false";
+            if(CBR.isSelected())
+                ricetta="true";
             String url = "http://localhost:8080/aggiungiF";
             String p=String.format("%s.png",Textn.getText());
             if(Mi.getText().equals("default"))
@@ -218,6 +228,7 @@ public class NuovoFarmaco extends JFrame implements ActionListener {
             String response = Unirest.post(url)
                     .field("nome", Textn.getText())
                     .field("marca", Textm.getText())
+                    .field("ricetta", ricetta)
                     .field("categoria", Textca.getText())
                     .field("prezzo",String.format("%.2f",Float.parseFloat(Textp.getText().replace(',','.'))))
                     .field("quantità", Textq.getText())

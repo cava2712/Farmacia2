@@ -49,7 +49,7 @@ public class MieMedicine extends JFrame implements ActionListener {
     String[] arr2;
     public MieMedicine(Utente u){
 
-        super("Tutti i Farmaci");
+        super("Mie medicine");
         ug=u;
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setSize(700, 700);
@@ -61,7 +61,7 @@ public class MieMedicine extends JFrame implements ActionListener {
 
         MenuBar= new JMenuBar();
         Opzioni = new  JMenu("Opzioni");
-        Carrello = new  JMenuItem(String.format("Carrello:0"));
+        Carrello = new  JMenuItem(String.format("Carrello:%d",u.numCarrello()));
         Disconnetti= new JMenuItem("Disconnetiti");
         Profilo= new JMenuItem(("profilo"));
         MenuBar.add(Opzioni);
@@ -114,6 +114,7 @@ public class MieMedicine extends JFrame implements ActionListener {
         Descrizione.setFont(new Font("Arial", Font.PLAIN, 15));
         Descrizione.setLocation(280, 240);
         Descrizione.setSize(400,290);
+        Descrizione.setEditable(false);
 
         scrolD=new JScrollPane(Descrizione);
         scrolD.setLocation(280, 240);
@@ -515,6 +516,7 @@ public class MieMedicine extends JFrame implements ActionListener {
     public void EventoTabella()
     {
         Descrizione.setText("");
+        Descrizione.setEditable(true);
         DataIn.getModel().setSelected(false);
         DataFin.getModel().setSelected(false);
         for( int i =0; i< arr2.length; i++)
@@ -523,7 +525,6 @@ public class MieMedicine extends JFrame implements ActionListener {
             if (riga==i)
             {
                 String[] arr3 = arr2[i].split("¶");
-                Header.setText(String.format("La terapia del farmaco %s inizia il %s e finisce il %s", arr3[0], arr3[2], arr3[3]));
                 if(arr3[4].equals("null"))
                 {
                     if(arr3[2].equals("null"))
@@ -539,9 +540,11 @@ public class MieMedicine extends JFrame implements ActionListener {
                     return;
                 }
 
-                Descrizione.setText((arr3[4]));
                 String[] dataIn = arr3[2].split("-");
                 String[] dataFin = arr3[3].split("-");
+                Header.setText(String.format("La terapia del farmaco %s inizia il %s-%s-%s e finisce il %s-%s-%s", arr3[0], dataIn[2],Integer.parseInt(dataIn[1])+1,dataIn[0],dataFin[2],Integer.parseInt(dataFin[1])+1,dataFin[0]));
+                Descrizione.setText((arr3[4]));
+
                 DataIn.getModel().setDate(Integer.parseInt(dataIn[0]),Integer.parseInt(dataIn[1]),Integer.parseInt(dataIn[2]));
                 DataFin.getModel().setDate(Integer.parseInt(dataFin[0]),Integer.parseInt(dataFin[1]),Integer.parseInt(dataFin[2]));
                 DataIn.getModel().setSelected(true);

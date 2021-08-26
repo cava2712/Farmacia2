@@ -105,7 +105,7 @@ public class Utente {
     }
 
 
-    public int numCarrello()
+    public int numCarrello() //numero di elementi nel carrello
     {
         int conta=0;
         for (Farmaco f: this.carrello) {
