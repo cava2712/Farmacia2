@@ -284,8 +284,6 @@ public class MieMedicine extends JFrame implements ActionListener {
                 File file = new File("Esame/FIle/miemedicine.txt");    //creates a new file instance
                 FileReader fr = new FileReader(file);   //reads the file
                 BufferedReader br = new BufferedReader(fr);  //creates a buffering character input stream
-
-
                 File ftmp = new File("Esame/FIle/tmp.txt"); //file temporaneo
                 FileWriter ftw = new FileWriter(ftmp);
                 FileReader ftr = new FileReader(ftmp);

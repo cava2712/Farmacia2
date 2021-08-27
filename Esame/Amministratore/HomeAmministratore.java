@@ -1,9 +1,7 @@
 package Esame.Amministratore;
 
 import Esame.Classi.DateLabelFormatter;
-import Esame.Classi.Farmaco;
 import Esame.Classi.Utente;
-import Esame.Farmacisti.NuovoFarmaco;
 import Esame.Login.loginInterface;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
@@ -11,7 +9,6 @@ import kong.unirest.Unirest;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
-
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
