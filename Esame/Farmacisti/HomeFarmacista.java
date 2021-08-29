@@ -53,6 +53,7 @@ public class HomeFarmacista extends JFrame implements ActionListener {
         BtnDisc.setLocation(545,550);
         this.add(BtnDisc);
         BtnDisc.addActionListener(this);
+        BtnRicetta.addActionListener(this);
         BtnMag.addActionListener(this);
         BtnProfilo.addActionListener(this);
         setVisible(true);
@@ -63,6 +64,10 @@ public class HomeFarmacista extends JFrame implements ActionListener {
         if (e.getSource() == BtnDisc) {
             dispose();
             new loginInterface();
+        }
+        if (e.getSource() == BtnRicetta) {
+            dispose();
+            new ControllaRicette(ug);
         }
         if (e.getSource() == BtnMag) {
             dispose();

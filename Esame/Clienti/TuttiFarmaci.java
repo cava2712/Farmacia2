@@ -14,6 +14,7 @@ import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.*;
 import java.util.ArrayList;
 
 public class TuttiFarmaci extends JFrame implements ActionListener {
@@ -42,7 +43,10 @@ public class TuttiFarmaci extends JFrame implements ActionListener {
     Object[][] farmaci;
     Utente ug;
     JFrame f;
-
+    ArrayList<String> farm = new ArrayList<>();
+    ArrayList<String> acc = new ArrayList<>();
+    String[] arr2;
+    String NomeU;
 
     ObjectMapper om = new ObjectMapper();
 
@@ -337,6 +341,59 @@ public class TuttiFarmaci extends JFrame implements ActionListener {
                 Qnt.setText("");
                 return;
             }
+            if(far.get(riga).getRicetta().equals("true"))
+            {
+                try {
+                    File file = new File("Esame/FIle/ricette.txt");    //creates a new file instance
+                    FileReader fr = new FileReader(file);   //reads the file
+                    BufferedReader br = new BufferedReader(fr);  //creates a buffering character input stream
+                    String line;
+                    br.readLine();
+                    while ((line = br.readLine()) != null) {
+                        String[] arr = line.split("☼");
+                        NomeU = arr[0];
+                        arr2 = arr[1].split("§");
+                        //ricette = new Object[arr2.length][2];
+                        for (int i = 0; i < arr2.length; i++) {
+                            String[] arr3 = arr2[i].split("¶");
+                            if(NomeU.equals(ug.getEmail()))
+                            {
+                                farm.add(arr3[0]);
+                                acc.add(arr3[1]);
+                            }
+                        }
+                    }
+                } catch (FileNotFoundException fileNotFoundException) {
+                    fileNotFoundException.printStackTrace();
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+                Boolean trovata=false;
+                for (int i =0;i< farm.size();i++)
+                {
+                    if(farm.get(i).equals(far.get(riga).getNome()))
+                    {
+                        if(acc.get(i).equals("approvata"))
+                            JOptionPane.showMessageDialog(null, "La tua ricetta è stata approvata!");
+
+                        else if(acc.get(i).equals("rifiutata")) {
+                            JOptionPane.showMessageDialog(null, "La tua ricetta non è stata approvata!");
+                            return;
+                        }
+                        else {
+                            JOptionPane.showMessageDialog(null, "La tua ricetta non è ancora stata visionata!");
+                            return;
+                        }
+                        trovata=true;
+                        break;
+                    }
+                }
+                if(!trovata)
+                {
+                    JOptionPane.showMessageDialog(null, "Questo farmaco richiede ricetta");
+                    return;
+                }
+            }
             if(far.get(riga).getQuantità() >= Integer.parseInt(Qnt.getText())) {
                 //creo un nuovo farmaco con la dimensione nuova da aggiungere al carrello
                 boolean trovato= false;
@@ -371,6 +428,8 @@ public class TuttiFarmaci extends JFrame implements ActionListener {
             far.get(riga).setQuantità(q);
             Lq.setText(String.format("quantità: %d",q));
             Carrello.setText(String.format("Carrello:%d",ug.numCarrello()));
+
+
         }
         if (e.getSource() == Back) {
             dispose();

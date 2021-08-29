@@ -41,6 +41,7 @@ public class MieMedicine extends JFrame implements ActionListener {
     private final JTextArea Descrizione;
     private final JTextField Mquantità;
 
+    String NomeU;
     ArrayList<Farmaco> far =null;
     int cont=0;
     Object[][] farmaci;
@@ -252,6 +253,7 @@ public class MieMedicine extends JFrame implements ActionListener {
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
+
         }
 
         if (e.getSource() == BtnModifica) {

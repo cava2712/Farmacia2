@@ -36,6 +36,7 @@ public class ImmettiRicetta extends JFrame implements ActionListener {
     private  JLabel pic;
     private final JButton BtnBack;
     private final JButton BtnInvia;
+    private final JButton BtnElimina;
     private  JLabel Lf;
     private final JComboBox NomeF;
     private  JTable Table;
@@ -47,6 +48,11 @@ public class ImmettiRicetta extends JFrame implements ActionListener {
     boolean ricettevuoto=true;
     ArrayList<String> cat =null;
     ObjectMapper om = new ObjectMapper();
+    ArrayList<String> nome = new ArrayList<>();
+    ArrayList<String> farm = new ArrayList<>();
+    int cont=0;
+    int riga;
+    String NomeP;
     public ImmettiRicetta(Utente u)
     {
         super(String.format("Immetti Ricetta"));
@@ -90,6 +96,7 @@ public class ImmettiRicetta extends JFrame implements ActionListener {
                 if(line.startsWith(ug.getEmail())) // trovata linea dell'utente e creiamo linea nuova
                 {
                     String[] arr= line.split("☼");
+                    NomeP=arr[0];
                     arr2 = arr[1].split("§");
                     ricettevuoto=false;
                     ricette = new Object[arr2.length][2];
@@ -98,6 +105,8 @@ public class ImmettiRicetta extends JFrame implements ActionListener {
                         String[] arr3 = arr2[i].split("¶");
                         ricette[i][0]=arr3[0];
                         ricette[i][1]=arr3[1];
+                        nome.add(NomeP);
+                        farm.add(arr3[0]);
                     }
                 }
             }
@@ -134,7 +143,7 @@ public class ImmettiRicetta extends JFrame implements ActionListener {
         NomeF = new JComboBox();
         NomeF.setFont(new Font("Arial", Font.PLAIN, 30));
         NomeF.setSize(300, 30);
-        NomeF.setLocation(280, 550);
+        NomeF.setLocation(260, 550);
         this.add(NomeF);
 
         CollectionType listType =
@@ -161,6 +170,12 @@ public class ImmettiRicetta extends JFrame implements ActionListener {
         BtnInvia.setLocation(5, 600);
         this.add(BtnInvia);
 
+        BtnElimina = new JButton("Elimina");
+        BtnElimina.setFont(new Font("Arial", Font.PLAIN, 25));
+        BtnElimina.setSize(250, 30);
+        BtnElimina.setLocation(265, 600);
+        this.add(BtnElimina);
+
         BtnBack = new JButton("Back");
         BtnBack.setFont(new Font("Arial", Font.PLAIN, 25));
         BtnBack.setSize(130, 50);
@@ -169,15 +184,14 @@ public class ImmettiRicetta extends JFrame implements ActionListener {
 
         BtnBack.addActionListener(this);
         BtnInvia.addActionListener(this);
+        BtnElimina.addActionListener(this);
         ScegliRicetta.addActionListener(this);
 
         setVisible(true);
     }
 
-    public void actionPerformed(ActionEvent e)
-    {
-        if (e.getSource() == ScegliRicetta)
-        {
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == ScegliRicetta) {
 
             JFileChooser open = new JFileChooser();
             int option = open.showOpenDialog(this);
@@ -187,11 +201,115 @@ public class ImmettiRicetta extends JFrame implements ActionListener {
             }
             ImageIcon icon = new ImageIcon(path);
             Image image = icon.getImage();
-            Image Nimage = image.getScaledInstance(290,300, Image.SCALE_SMOOTH);
+            Image Nimage = image.getScaledInstance(290, 300, Image.SCALE_SMOOTH);
             pic.setIcon(new ImageIcon(Nimage));
+        }
+        if (e.getSource() == BtnElimina) {
+            try {
+                riga = Table.getSelectedRow();
+                File file = new File("Esame/FIle/ricette.txt");    //creates a new file instance
+                FileReader fr = new FileReader(file);   //reads the file
+                BufferedReader br = new BufferedReader(fr);  //creates a buffering character input stream
+                File ftmp = new File("Esame/FIle/tmp.txt");
+                FileWriter ftw = new FileWriter(ftmp);
+                FileReader ftr = new FileReader(ftmp);
+                BufferedReader btr = new BufferedReader(ftr);
+                String line;
+                String modificata = "";
+                while ((line = br.readLine()) != null) {
+
+                    if (line.startsWith(nome.get(riga))) // trovata linea dell'utente e creiamo linea nuova
+                    {
+                        String[] arr = line.split("☼");
+                        arr2 = arr[1].split("§");
+                        modificata = String.format("%s☼", nome.get(riga));
+                        for (int i = 0; i < arr2.length; i++) {
+                            String[] arr3 = arr2[i].split("¶");
+                            if (farm.get(riga).compareTo(arr3[0]) == 0) {
+
+                            } else
+                                modificata += arr2[i] + '§';
+                        }
+                        continue;
+                    }
+                    ftw.append(line + "\n");
+                }
+                ftw.append(modificata);
+
+                try {
+                    ftw.close();
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+                //copia in ricette.txt
+                FileWriter fw = new FileWriter(file);
+                while ((line = btr.readLine()) != null) {
+                    fw.append(line + "\n");
+                }
+
+                FileOutputStream delatet = new FileOutputStream(ftmp);
+                delatet.write(("").getBytes());
+
+                try {
+                    delatet.close();
+                    fr.close();
+                    ftr.close();
+                    fw.close();
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+
+
+            } catch (IOException ee) {
+                ee.printStackTrace();
+            }
+            File fIm = new File(String.format("Esame/pic/Ricette/%s_%s.jpg", nome.get(riga), farm.get(riga)));
+            fIm.delete();
+
+            nome.remove(riga);
+            farm.remove(riga);
+            ricette = new Object[nome.size()][2];
+            for (int i = 0; i < nome.size(); i++) {
+                ricette[i][0] = nome.get(i);
+                ricette[i][1] = farm.get(i);
+            }
+            scrol.remove(Table);
+            this.remove(scrol);
+            Table = new JTable(ricette, colName) {
+                @Override
+                public boolean isCellEditable(int row, int column) {
+                    return false;
+                }
+            };
+
+            Table.setFont(new Font("Arial", Font.PLAIN, 15));
+            Table.setSize(390, 510);
+            Table.setFillsViewportHeight(true);
+            scrol = new JScrollPane(Table);
+            scrol.setLocation(5, 5);
+            scrol.setSize(390, 510);
+            this.add(scrol);
+            Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+                @Override
+                public void valueChanged(ListSelectionEvent e) {
+                    EventoTabella();
+                }
+
+            });
+
+            JOptionPane.showMessageDialog(null, "Ricetta eliminata!");
+
         }
         if (e.getSource() == BtnInvia)
         {
+            for (int i=0;i< ricette.length;i++)
+            {
+                if(String.valueOf(NomeF.getSelectedItem()).equals(ricette[i][0]))
+                {
+                    JOptionPane.showMessageDialog(null, "È già presente una ricetta per questo farmaco!");
+                    return;
+                }
+            }
             boolean trovata=false;
             File f =  new File(path);
             String response=Unirest.post("http://localhost:8080/ricetta")
