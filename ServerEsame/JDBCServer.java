@@ -3,16 +3,30 @@ import Esame.Classi.Farmaco;
 import Esame.Classi.Types;
 import Esame.Classi.Utente;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.awt.*;
+import java.io.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.TimeZone;
-
 import static spark.Spark.*;
+
+import org.apache.commons.codec.binary.Base64;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.util.Attributes;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import spark.utils.IOUtils;
+
+import javax.imageio.ImageIO;
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.http.Part;
+
 public class JDBCServer {
+
     static Logger logger = LoggerFactory.getLogger(JDBCServer.class);
     ObjectMapper om = new ObjectMapper();
     Statement statement;
@@ -30,6 +44,23 @@ public class JDBCServer {
 
         // Start embedded server at this port
         port(8080);
+
+        // POST - Invio Ricetta
+        // curl -X POST http://localhost:8080/ricetta
+
+        post("/ricetta", (request, response) -> {
+            String email =request.headers("email");
+            String NomeF =request.headers("nomef");
+            request.attribute("org.eclipse.jetty.multipartConfig", new MultipartConfigElement("Esame/pic/tmp"));
+            Part filePart = request.raw().getPart("ricetta");
+
+            try (InputStream inputStream = filePart.getInputStream()) {
+                OutputStream outputStream = new FileOutputStream(String.format("Esame/pic/Ricette/%s_%s.jpg",email,NomeF));
+                IOUtils.copy(inputStream, outputStream);
+                outputStream.close();
+            }
+            return "ok";
+        });
 
         // POST - creazione utente
         // curl -X POST http://localhost:8080/password
@@ -136,7 +167,8 @@ public class JDBCServer {
             String marca = request.queryParams("marca");
             String categoria = request.queryParams("categoria");
             String percorsoImg = request.queryParams("percorsoImg");
-            String query = String.format("INSERT INTO `farmacia`.`farmaco` (`quantità`, `nome`, `marca`, `categoria`, `percorsoImg`, `prezzo`) VALUES ('%s', '%s', '%s', '%s', '%s', '%s');\n",qnt,nome,marca,categoria,percorsoImg,prezzo);
+            String ricetta = request.queryParams("ricetta");
+            String query = String.format("INSERT INTO `farmacia`.`farmaco` (`quantità`, `nome`, `marca`, `categoria`, `percorsoImg`, `prezzo`, `ricetta`) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s');\n",qnt,nome,marca,categoria,percorsoImg,prezzo,ricetta);
             try {
                 statement.executeUpdate(query);
             }
@@ -164,7 +196,8 @@ public class JDBCServer {
             String nome = request.queryParams("nome");
             String marca = request.queryParams("marca");
             String categoria = request.queryParams("categoria");
-            String query = String.format("UPDATE `farmacia`.`farmaco` SET `quantità` = '%d', `nome` = '%s', `marca` = '%s', `categoria` = '%s', `prezzo` = '%s' WHERE (`codice` = '%d');",qnt,nome,marca,categoria,prezzo,codice);
+            String ricetta = request.queryParams("ricetta");
+            String query = String.format("UPDATE `farmacia`.`farmaco` SET `quantità` = '%d', `nome` = '%s', `marca` = '%s', `categoria` = '%s', `prezzo` = '%s', `ricetta` = '%s' WHERE (`codice` = '%d');",qnt,nome,marca,categoria,prezzo,ricetta,codice);
             try {
                 statement.executeUpdate(query);
             }
@@ -289,6 +322,17 @@ public class JDBCServer {
             return om.writeValueAsString(l);
         });
 
+        // GET - get nome farmaci
+        // For testing: curl -X GET http://localhost:8080/nomefarmaci
+        get("/nomefarmaci", (request, response) -> {
+            ResultSet rs = statement.executeQuery("SELECT nome FROM farmacia.farmaco where ricetta='true';");
+            ArrayList<String> l = new ArrayList<String>();
+            while (rs.next()) {
+                l.add(rs.getString("nome"));
+            }
+            return om.writeValueAsString(l);
+        });
+
         // GET - get all getegorie
         // For testing: curl -X GET http://localhost:8080/categorie
         get("/categorie", (request, response) -> {
@@ -306,7 +350,7 @@ public class JDBCServer {
             ResultSet rs = statement.executeQuery("SELECT * FROM farmaco");
             ArrayList<Farmaco> l = new ArrayList<Farmaco>();
             while (rs.next()) {
-                l.add(new Farmaco(rs.getInt("codice"),rs.getInt("quantità"), rs.getString("nome"),rs.getString("marca"),rs.getString("categoria"),rs.getFloat("prezzo"),rs.getString("percorsoImg")));
+                l.add(new Farmaco(rs.getInt("codice"),rs.getInt("quantità"), rs.getString("nome"),rs.getString("marca"),rs.getString("categoria"),rs.getFloat("prezzo"),rs.getString("percorsoImg"),rs.getString("ricetta")));
 
             }
             return om.writeValueAsString(l);
