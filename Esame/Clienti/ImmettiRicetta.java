@@ -1,34 +1,23 @@
 package Esame.Clienti;
 
-import Esame.Classi.DateLabelFormatter;
-import Esame.Classi.Farmaco;
 import Esame.Classi.Utente;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
-import com.mysql.cj.util.Base64Decoder;
-import kong.unirest.HttpResponse;
-import kong.unirest.JsonNode;
 import kong.unirest.Unirest;
-import org.apache.commons.codec.Encoder;
-import org.apache.commons.codec.binary.Base64;
-import org.jdatepicker.impl.JDatePanelImpl;
-import org.jdatepicker.impl.JDatePickerImpl;
-import org.jdatepicker.impl.UtilDateModel;
+
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.Date;
 import java.util.*;
-import java.util.Properties;
-
+/**
+ * <p>Questa è la finestra dove l'utente invia le ricette ai farmacisti</p>
+ *
+ * @author Luca Barbieri, Davide Cavazzuti
+ **/
 public class ImmettiRicetta extends JFrame implements ActionListener {
     String[] colName= new String[] {"Farmaco" , "approvata" };
     private final JLabel Im;
@@ -46,13 +35,12 @@ public class ImmettiRicetta extends JFrame implements ActionListener {
     String path = null;
     Utente ug;
     boolean ricettevuoto=true;
-    ArrayList<String> cat =null;
+    ArrayList<String> listaFarmaci =null;
     ObjectMapper om = new ObjectMapper();
-    ArrayList<String> nome = new ArrayList<>();
-    ArrayList<String> farm = new ArrayList<>();
-    int cont=0;
+    ArrayList<String> ricetteUtente = new ArrayList<>();
+    ArrayList<String> statoRicette = new ArrayList<>();
     int riga;
-    String NomeP;
+
     public ImmettiRicetta(Utente u)
     {
         super(String.format("Immetti Ricetta"));
@@ -82,21 +70,18 @@ public class ImmettiRicetta extends JFrame implements ActionListener {
         this.add(pic);
 
         ricette = new Object[0][2];
-        //for per riempire ricette
+        //leggiamo il file "ricette.txt" per leggere le ricette dell'attuale utente
         try
         {
             File file = new File("Esame/FIle/ricette.txt");    //creates a new file instance
             FileReader fr = new FileReader(file);   //reads the file
             BufferedReader br = new BufferedReader(fr);  //creates a buffering character input stream
             String line;
-
-
             while((line=br.readLine())!=null)
             {
                 if(line.startsWith(ug.getEmail())) // trovata linea dell'utente e creiamo linea nuova
                 {
                     String[] arr= line.split("☼");
-                    NomeP=arr[0];
                     arr2 = arr[1].split("§");
                     ricettevuoto=false;
                     ricette = new Object[arr2.length][2];
@@ -105,8 +90,8 @@ public class ImmettiRicetta extends JFrame implements ActionListener {
                         String[] arr3 = arr2[i].split("¶");
                         ricette[i][0]=arr3[0];
                         ricette[i][1]=arr3[1];
-                        nome.add(NomeP);
-                        farm.add(arr3[0]);
+                        ricetteUtente.add(arr3[0]);
+                        statoRicette.add(arr3[1]);
                     }
                 }
             }
@@ -114,26 +99,8 @@ public class ImmettiRicetta extends JFrame implements ActionListener {
         catch (IOException ee) {
             ee.printStackTrace();
         }
-        Table = new JTable(ricette,colName){
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
-        Table.setFont(new Font("Arial", Font.PLAIN, 15));
-        Table.setSize(390, 480);
-        Table.setFillsViewportHeight(true);
-        scrol=new JScrollPane(Table);
-        scrol.setLocation(5, 5);
-        scrol.setSize(390,480);
-        this.add(scrol);
-        Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-                EventoTabella();
-            }
 
-        });
+        creaTabella();
 
         Lf = new JLabel("Nome farmaco:");
         Lf.setFont(new Font("Arial", Font.PLAIN, 30));
@@ -151,7 +118,7 @@ public class ImmettiRicetta extends JFrame implements ActionListener {
         String url = "http://localhost:8080/nomefarmaci";
         String json = Unirest.get(url).asString().getBody();
         try {
-            cat = om.readValue(json, listType);
+            listaFarmaci = om.readValue(json, listType);
         } catch (Exception e) {
             try {
                 throw new Exception(e);
@@ -159,7 +126,7 @@ public class ImmettiRicetta extends JFrame implements ActionListener {
                 exception.printStackTrace();
             }
         }
-        for (String s:cat)
+        for (String s: listaFarmaci)
         {
             NomeF.addItem(s);
         }
@@ -207,6 +174,11 @@ public class ImmettiRicetta extends JFrame implements ActionListener {
         if (e.getSource() == BtnElimina) {
             try {
                 riga = Table.getSelectedRow();
+                if(riga==-1)
+                {
+                    JOptionPane.showMessageDialog(null, "Devi selezionare una riga delle ricette");
+                    return;
+                }
                 File file = new File("Esame/FIle/ricette.txt");    //creates a new file instance
                 FileReader fr = new FileReader(file);   //reads the file
                 BufferedReader br = new BufferedReader(fr);  //creates a buffering character input stream
@@ -217,15 +189,14 @@ public class ImmettiRicetta extends JFrame implements ActionListener {
                 String line;
                 String modificata = "";
                 while ((line = br.readLine()) != null) {
-
-                    if (line.startsWith(nome.get(riga))) // trovata linea dell'utente e creiamo linea nuova
+                    if (line.startsWith(ug.getEmail())) // trovata linea dell'utente e creiamo linea nuova
                     {
                         String[] arr = line.split("☼");
                         arr2 = arr[1].split("§");
-                        modificata = String.format("%s☼", nome.get(riga));
+                        modificata = String.format("%s☼", ug.getEmail());
                         for (int i = 0; i < arr2.length; i++) {
                             String[] arr3 = arr2[i].split("¶");
-                            if (farm.get(riga).compareTo(arr3[0]) == 0) {
+                            if (ricetteUtente.get(riga).compareTo(arr3[0]) == 0) {
 
                             } else
                                 modificata += arr2[i] + '§';
@@ -234,7 +205,10 @@ public class ImmettiRicetta extends JFrame implements ActionListener {
                     }
                     ftw.append(line + "\n");
                 }
-                ftw.append(modificata);
+                if(!modificata.equals(String.format("%s☼", ug.getEmail())))
+                {
+                    ftw.append(modificata);
+                }
 
                 try {
                     ftw.close();
@@ -263,45 +237,29 @@ public class ImmettiRicetta extends JFrame implements ActionListener {
             } catch (IOException ee) {
                 ee.printStackTrace();
             }
-            File fIm = new File(String.format("Esame/pic/Ricette/%s_%s.jpg", nome.get(riga), farm.get(riga)));
+            File fIm = new File(String.format("Esame/pic/Ricette/%s_%s.jpg", ug.getEmail(), ricetteUtente.get(riga)));
             fIm.delete();
-
-            nome.remove(riga);
-            farm.remove(riga);
-            ricette = new Object[nome.size()][2];
-            for (int i = 0; i < nome.size(); i++) {
-                ricette[i][0] = nome.get(i);
-                ricette[i][1] = farm.get(i);
+            ricetteUtente.remove(riga);
+            statoRicette.remove(riga);
+            ricette = new Object[ricetteUtente.size()][2];
+            for (int i = 0; i < ricetteUtente.size(); i++) {
+                ricette[i][0] = ricetteUtente.get(i);
+                ricette[i][1] = statoRicette.get(i);
             }
             scrol.remove(Table);
             this.remove(scrol);
-            Table = new JTable(ricette, colName) {
-                @Override
-                public boolean isCellEditable(int row, int column) {
-                    return false;
-                }
-            };
-
-            Table.setFont(new Font("Arial", Font.PLAIN, 15));
-            Table.setSize(390, 510);
-            Table.setFillsViewportHeight(true);
-            scrol = new JScrollPane(Table);
-            scrol.setLocation(5, 5);
-            scrol.setSize(390, 510);
-            this.add(scrol);
-            Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-                @Override
-                public void valueChanged(ListSelectionEvent e) {
-                    EventoTabella();
-                }
-
-            });
+            creaTabella();
 
             JOptionPane.showMessageDialog(null, "Ricetta eliminata!");
 
         }
         if (e.getSource() == BtnInvia)
         {
+            if(Im.getText().equals(""))
+            {
+                JOptionPane.showMessageDialog(null, "Devi selezionare l'immagine della ricetta!");
+                return;
+            }
             for (int i=0;i< ricette.length;i++)
             {
                 if(String.valueOf(NomeF.getSelectedItem()).equals(ricette[i][0]))
@@ -368,7 +326,6 @@ public class ImmettiRicetta extends JFrame implements ActionListener {
 
                 FileOutputStream delatet= new FileOutputStream(ftmp);
                 delatet.write(("").getBytes());
-
                 try {
                     delatet.close();
                     fr.close();
@@ -379,16 +336,12 @@ public class ImmettiRicetta extends JFrame implements ActionListener {
                 {
                     ioException.printStackTrace();
                 }
-
-
             } catch (IOException ee) {
                 ee.printStackTrace();
             }
-            ArrayList<String> far = new ArrayList<>();
-            ArrayList<String> far2 = new ArrayList<>();
             int ricetteN=0;
             if(!ricettevuoto)
-                 ricetteN = ricette.length;
+                ricetteN = ricette.length;
             if(ricetteN==0)
             {
                 ricette=new Object[1][2];
@@ -396,50 +349,26 @@ public class ImmettiRicetta extends JFrame implements ActionListener {
                 ricette[0][1]="non visionata";
                 arr2= new String[1];
                 arr2[0] = String.format("%s¶%s",String.valueOf(NomeF.getSelectedItem()),"non visionata");
+                ricetteUtente.add(String.format("%s",String.valueOf(NomeF.getSelectedItem())));
+                statoRicette.add("non visionata");
                 ricettevuoto=false;
             }
             else
             {
-                for (int i =0;i<ricetteN;i++)
+                ricetteUtente.add(String.valueOf(NomeF.getSelectedItem()));
+                statoRicette.add("non visionata");
+                ricette= new Object[ricetteUtente.size()][2];
+                for(int i =0; i< ricetteUtente.size();i++)
                 {
-                    far.add(String.valueOf(ricette[i][0]));
-                    far2.add(String.valueOf(ricette[i][1]));
-                }
-                far.add(String.valueOf(NomeF.getSelectedItem()));
-                far2.add("non visionata");
-                ricette= new Object[far.size()][2];
-                for(int i =0; i< far.size();i++)
-                {
-                    ricette[i][0]=far.get(i);
-                    ricette[i][1]=far2.get(i);
+                    ricette[i][0]=ricetteUtente.get(i);
+                    ricette[i][1]=statoRicette.get(i);
                 }
                 arr2 = Arrays.copyOf(arr2,arr2.length+1);
                 arr2[arr2.length-1]=String.format("%s¶%s",String.valueOf(NomeF.getSelectedItem()),"non visionata");
             }
             scrol.remove(Table);
             this.remove(scrol);
-            Table = new JTable(ricette,colName){
-                @Override
-                public boolean isCellEditable(int row, int column) {
-                    return false;
-                }
-            };
-
-            Table.setFont(new Font("Arial", Font.PLAIN, 15));
-            Table.setSize(390, 480);
-            Table.setFillsViewportHeight(true);
-            scrol=new JScrollPane(Table);
-            scrol.setLocation(5, 5);
-            scrol.setSize(390,480);
-            this.add(scrol);
-
-            Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-                @Override
-                public void valueChanged(ListSelectionEvent e) {
-                    EventoTabella();
-                }
-
-            });
+            creaTabella();
             if(response.equals("ok"))
                 JOptionPane.showMessageDialog(null, "Ricetta Inviata correttamente!");
         }
@@ -449,20 +378,38 @@ public class ImmettiRicetta extends JFrame implements ActionListener {
             new HomeCliente(ug);
         }
     }
-    public void EventoTabella()
-    {
-        for( int i =0; i< arr2.length; i++)
-        {
-            int riga=Table.getSelectedRow();
-            if (riga==i)
-            {
-                String[] arr3 = arr2[i].split("¶");
-                ImageIcon icon = new ImageIcon(String.format("Esame/pic/Ricette/%s_%s.jpg",ug.getEmail(),arr3[0]));
-                Image image = icon.getImage();
-                Image Nimage = image.getScaledInstance(290,300, Image.SCALE_SMOOTH);
-                pic.setIcon(new ImageIcon(Nimage));
-                return;
+    private void creaTabella() {
+        Table = new JTable(ricette,colName){
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
             }
-        }
+        };
+        Table.setFont(new Font("Arial", Font.PLAIN, 15));
+        Table.setSize(390, 480);
+        Table.setFillsViewportHeight(true);
+        scrol = new JScrollPane(Table);
+        scrol.setLocation(5, 5);
+        scrol.setSize(390, 480);
+        this.add(scrol);
+        Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                for( int i =0; i< arr2.length; i++)
+                {
+                    int riga=Table.getSelectedRow();
+                    if (riga==i)
+                    {
+                        String[] arr3 = arr2[i].split("¶");
+                        ImageIcon icon = new ImageIcon(String.format("Esame/pic/Ricette/%s_%s.jpg",ug.getEmail(),arr3[0]));
+                        Image image = icon.getImage();
+                        Image Nimage = image.getScaledInstance(290,300, Image.SCALE_SMOOTH);
+                        pic.setIcon(new ImageIcon(Nimage));
+                        return;
+                    }
+                }
+            }
+
+        });
     }
 }

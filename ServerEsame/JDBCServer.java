@@ -1,37 +1,36 @@
 package ServerEsame;
+
 import Esame.Classi.Farmaco;
 import Esame.Classi.Types;
 import Esame.Classi.Utente;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import spark.utils.IOUtils;
 
-import java.awt.*;
-import java.io.*;
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.http.Part;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.TimeZone;
+
 import static spark.Spark.*;
-
-import org.apache.commons.codec.binary.Base64;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.util.Attributes;
-import org.eclipse.jetty.util.ssl.SslContextFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import spark.utils.IOUtils;
-
-import javax.imageio.ImageIO;
-import javax.servlet.MultipartConfigElement;
-import javax.servlet.http.Part;
-
+/**
+ * <p>Questa è il codice del server rest per gestire tutte le interazioni con il database.</p>
+ *
+ * @author Luca Barbieri, Davide Cavazzuti
+ **/
 public class JDBCServer {
 
-    static Logger logger = LoggerFactory.getLogger(JDBCServer.class);
     ObjectMapper om = new ObjectMapper();
     Statement statement;
     public static final String JDBC_Driver_MySQL = "com.mysql.cj.jdbc.Driver";
-    public static final String JDBC_URL_MySQL = "jdbc:mysql://localhost:3306/farmacia?user=root&password=davide&serverTimezone=" +
+    public static final String JDBC_URL_MySQL = "jdbc:mysql://localhost:3306/farmacia?user=root&password=root&serverTimezone=" +
             TimeZone.getDefault().getID();
     int a;
     public void run()
@@ -227,7 +226,7 @@ public class JDBCServer {
             }
             catch(SQLException e)
             {
-                    throw new SQLException(e);
+                throw new SQLException(e);
             }
             response.status(201);
             return "ok";
@@ -333,7 +332,7 @@ public class JDBCServer {
             return om.writeValueAsString(l);
         });
 
-        // GET - get all getegorie
+        // GET - get all categorie
         // For testing: curl -X GET http://localhost:8080/categorie
         get("/categorie", (request, response) -> {
             ResultSet rs = statement.executeQuery("SELECT categoria FROM farmacia.farmaco group by categoria;");

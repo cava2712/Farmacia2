@@ -1,18 +1,24 @@
 package Esame.Login;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.io.IOException;
-
 import Esame.Amministratore.HomeAmministratore;
-import Esame.Clienti.HomeCliente;
 import Esame.Classi.Types;
 import Esame.Classi.Utente;
+import Esame.Clienti.HomeCliente;
 import Esame.Farmacisti.HomeFarmacista;
-import kong.unirest.Unirest;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import kong.unirest.Unirest;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+
+/**
+ * <p>Questa è la finestra di login principale dove un utente può accedere all'applicazione selezionando il proprio ruolo: "Cliente", "Farmacista" o "Amministratore".</p>
+ *
+ * @author Luca Barbieri, Davide Cavazzuti
+ **/
 
 public class loginInterface extends JFrame implements ActionListener
 {
@@ -153,7 +159,7 @@ public class loginInterface extends JFrame implements ActionListener
     public void actionPerformed(ActionEvent e) {
 
         if (e.getSource() == BtnLogin) {
-            //qua prendiamo i dati e poi facciamo la query
+            //qua prendiamo i dati e poi facciamo la query per controllare le credenziali
 
             String radio=null;
             if(RadioCliente.isSelected())
@@ -182,7 +188,6 @@ public class loginInterface extends JFrame implements ActionListener
                 ee.printStackTrace();
             }
             dispose();
-            //controllo esiste cliente
 
             if(u.getT()== Types.cliente)
                 new HomeCliente(u);

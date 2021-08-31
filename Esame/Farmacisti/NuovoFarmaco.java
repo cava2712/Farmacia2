@@ -1,11 +1,7 @@
 package Esame.Farmacisti;
 
-import Esame.Classi.DateLabelFormatter;
 import Esame.Classi.Utente;
 import kong.unirest.Unirest;
-import org.jdatepicker.impl.JDatePanelImpl;
-import org.jdatepicker.impl.JDatePickerImpl;
-import org.jdatepicker.impl.UtilDateModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,9 +10,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.*;
-import java.util.Date;
-import java.util.Properties;
-
+/**
+ * <p>Questa è la finestra di home del farmacista</p>
+ *
+ * @author Luca Barbieri, Davide Cavazzuti
+ **/
 public class NuovoFarmaco extends JFrame implements ActionListener {
     private final JLabel Ln;
     private final JLabel Lm;
@@ -35,7 +33,6 @@ public class NuovoFarmaco extends JFrame implements ActionListener {
     private final JCheckBox CBO;
     private final JCheckBox CBR;
     String path = null;
-    String Pimg = null;
     Utente ug;
     public NuovoFarmaco(Utente u) {
 
@@ -74,7 +71,6 @@ public class NuovoFarmaco extends JFrame implements ActionListener {
         CBO.setLocation(250, 100);
         this.add(CBO);
         CBO.addItemListener(new ItemListener(){
-
             @Override
             public void itemStateChanged(ItemEvent e)
             {
@@ -97,8 +93,6 @@ public class NuovoFarmaco extends JFrame implements ActionListener {
             }
         });
         CBO.setSelected(true);
-
-
 
         Ln= new JLabel("Nome:");
         Ln.setFont(new Font("Arial", Font.PLAIN, 30));
@@ -172,13 +166,11 @@ public class NuovoFarmaco extends JFrame implements ActionListener {
         ModificaImmagine.addActionListener(this);
 
         setVisible(true);
-
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == ModificaImmagine) {
-
             JFileChooser open = new JFileChooser();
             int option = open.showOpenDialog(this);
             if (option == JFileChooser.APPROVE_OPTION) {
@@ -246,7 +238,6 @@ public class NuovoFarmaco extends JFrame implements ActionListener {
             }
 
             JOptionPane.showMessageDialog(null, "Farmaco aggiunto con successo");
-
             InputStream is = null;
             OutputStream os = null;
             if(!CBO.isSelected() && path!=null) {
@@ -277,9 +268,6 @@ public class NuovoFarmaco extends JFrame implements ActionListener {
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
-
         }
     }
-
-
 }

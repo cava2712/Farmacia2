@@ -1,13 +1,17 @@
 package Esame.Farmacisti;
 import Esame.Classi.Utente;
-import Esame.Clienti.ProfiloF;
+import Esame.Farmacisti.ProfiloF;
 import Esame.Login.loginInterface;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+/**
+ * <p>Questa è la finestra di home del farmacista</p>
+ *
+ * @author Luca Barbieri, Davide Cavazzuti
+ **/
 public class HomeFarmacista extends JFrame implements ActionListener {
     private final JButton BtnMag;
     private final JButton BtnOrd;
@@ -16,7 +20,6 @@ public class HomeFarmacista extends JFrame implements ActionListener {
     private final JButton BtnProfilo;
     private final JButton BtnDisc;
     Utente ug;
-
 
     public HomeFarmacista(Utente u) {
         super("HOME");
@@ -28,30 +31,36 @@ public class HomeFarmacista extends JFrame implements ActionListener {
         this.setLayout(null);
         ug=u;
 
-        BtnMag = new JButton("Gestisci Magazino");
+        BtnMag = new JButton("Gestisci Magazzino");
         BtnMag.setSize(200,200);
         BtnMag.setLocation(45,50);
+        this.add(BtnMag);
+
         BtnOrd= new JButton("Ordina nuovi medicinali");
         BtnOrd.setSize(200,200);
         BtnOrd.setLocation(295,50);
+        this.add(BtnOrd);
+
         BtnRisp = new JButton("Rispondi ai clienti");
         BtnRisp.setSize(200,200);
         BtnRisp.setLocation(545,50);
-        this.add(BtnMag);
-        this.add(BtnOrd);
         this.add(BtnRisp);
+
         BtnRicetta = new JButton("Verifica ricette");
         BtnRicetta.setSize(200,200);
         BtnRicetta.setLocation(150,300);
+        this.add(BtnRicetta);
+
         BtnProfilo = new JButton("PROFILO");
         BtnProfilo.setSize(200,200);
         BtnProfilo.setLocation(450,300);
-        this.add(BtnRicetta);
         this.add(BtnProfilo);
+
         BtnDisc = new JButton("Disconnettiti");
         BtnDisc.setSize(200,50);
         BtnDisc.setLocation(545,550);
         this.add(BtnDisc);
+
         BtnDisc.addActionListener(this);
         BtnRicetta.addActionListener(this);
         BtnMag.addActionListener(this);
@@ -81,10 +90,5 @@ public class HomeFarmacista extends JFrame implements ActionListener {
             dispose();
             new ProfiloF(ug);
         }
-    }
-
-    public static void main(String[] args) {
-        new HomeFarmacista(new Utente());
-
     }
 }

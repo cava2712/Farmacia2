@@ -12,11 +12,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.util.ArrayList;
-
+/**
+ * <p>Questa è la finestra per visualizzare il carrello attuale del "Cliente" dove può procedere al pagamento </p>
+ *
+ * @author Luca Barbieri, Davide Cavazzuti
+ **/
 public class Carrello extends JFrame implements ActionListener {
-    String[] colName= new String[] { "Nome","Categoria" ,"Quantità" };
-
-    private  JTable Table;
     private final JLabel Lc;
     private final JLabel Ln;
     private final JLabel Lm;
@@ -27,11 +28,13 @@ public class Carrello extends JFrame implements ActionListener {
     private final JButton Elimina;
     private final JButton Pagamento;
     private final JButton Back;
-    private  JScrollPane scrol;
-    private JFrame f;
+    String[] colName= new String[] { "Nome","Categoria" ,"Quantità" };
     int cont=0;
     Object[][] farmaci;
     Utente ug;
+    private  JTable Table;
+    private  JScrollPane scrol;
+    private JFrame f;
 
     public Carrello(Utente u) throws Exception {
         super("Carrello");
@@ -53,15 +56,8 @@ public class Carrello extends JFrame implements ActionListener {
         {
             farmaci[i][0]= u.carrello.get(i).getNome();
             farmaci[i][1]= u.carrello.get(i).getCategoria();
-            farmaci[i][2]= u.carrello.get(i).getQuantità();
+            farmaci[i][2]= u.carrello.get(i).getQuantita();
         }
-        Table = new JTable(farmaci,colName){
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            } //per non modificare le righe/colonne
-        };
-
 
         pic= new JLabel();
         this.add(pic);
@@ -72,13 +68,11 @@ public class Carrello extends JFrame implements ActionListener {
         Lc.setLocation(290, 170);
         this.add(Lc);
 
-
         Ln= new JLabel();
         Ln.setFont(new Font("Arial", Font.PLAIN, 15));
         Ln.setSize(400, 30);
         Ln.setLocation(290, 190);
         this.add(Ln);
-
 
         Lm= new JLabel();
         Lm.setFont(new Font("Arial", Font.PLAIN, 15));
@@ -86,13 +80,11 @@ public class Carrello extends JFrame implements ActionListener {
         Lm.setLocation(290, 210);
         this.add(Lm);
 
-
         Lca= new JLabel();
         Lca.setFont(new Font("Arial", Font.PLAIN, 15));
         Lca.setSize(400, 30);
         Lca.setLocation(290, 230);
         this.add(Lca);
-
 
         Lp= new JLabel();
         Lp.setFont(new Font("Arial", Font.PLAIN, 15));
@@ -100,44 +92,13 @@ public class Carrello extends JFrame implements ActionListener {
         Lp.setLocation(290, 250);
         this.add(Lp);
 
-
         Lq= new JLabel();
         Lq.setFont(new Font("Arial", Font.PLAIN, 15));
         Lq.setSize(400, 30);
         Lq.setLocation(290, 270);
         this.add(Lq);
 
-
-        Table.setFont(new Font("Arial", Font.PLAIN, 15));
-        Table.setSize(250, 370);
-        Table.setFillsViewportHeight(true);
-        scrol=new JScrollPane(Table);
-        scrol.setLocation(5, 20);
-        scrol.setSize(250,370);
-        this.add(scrol);
-        Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-                int riga=Table.getSelectedRow();
-                Lc.setText(String.format("codice: %d",u.carrello.get(riga).getCodice()));
-                Ln.setText("nome: "+u.carrello.get(riga).getNome());
-                Lm.setText("marca: "+u.carrello.get(riga).getMarca());
-                Lca.setText("categoria: "+u.carrello.get(riga).getCategoria());
-                Lp.setText(String.format("prezzo: %f",u.carrello.get(riga).getPrezzo()));
-                Lq.setText(String.format("quantità: %d",u.carrello.get(riga).getQuantità()));
-
-                String a = ug.carrello.get(riga).getPercorsoImg();
-                if(a=="")
-                    a="default.png";
-                ImageIcon icon = new ImageIcon(String.format("Esame/pic/Farmaci/%s",a));
-                Image image = icon.getImage();
-                Image Nimage = image.getScaledInstance(225,145, Image.SCALE_SMOOTH);
-                pic.setIcon(new ImageIcon(Nimage));
-                pic.setSize(225, 145);
-                pic.setLocation(270, 20);
-                f.add(pic);
-            }
-        });
+        creazioneTabella();
 
         Elimina= new JButton("Elimina");
         Elimina.setFont(new Font("Arial", Font.PLAIN, 15));
@@ -157,18 +118,16 @@ public class Carrello extends JFrame implements ActionListener {
         Back.setLocation(320, 400);
         this.add(Back);
 
-
         Elimina.addActionListener(this);
         Pagamento.addActionListener(this);
         Back.addActionListener(this);
         setVisible(true);
     }
-
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == Pagamento) {
             String url = "http://localhost:8080/pagamento";
-            String json = Unirest.get(url).asString().getBody();
+            String s = Unirest.get(url).asString().getBody();
         }
         if (e.getSource() == Elimina) {
             int riga = Table.getSelectedRow();
@@ -180,56 +139,20 @@ public class Carrello extends JFrame implements ActionListener {
 
             this.remove(scrol);
             scrol.remove(Table);
-            int c = 0;
+
             ArrayList<Farmaco> lisa = new ArrayList<Farmaco>();
             for (Farmaco f : ug.carrello) {
                 lisa.add(f);
-                c++;
             }
-            farmaci = new Object[c][3];
-            for (int i = 0; i < c; i++) {
+            farmaci = new Object[lisa.size()][3];
+            for (int i = 0; i < lisa.size(); i++) {
                 farmaci[i][0] = lisa.get(i).getCodice();
                 farmaci[i][1] = lisa.get(i).getNome();
                 farmaci[i][2] = lisa.get(i).getPrezzo();
             }
-            Table = new JTable(farmaci, colName) {
-                @Override
-                public boolean isCellEditable(int row, int column) {
-                    return false;
-                }
-            };
 
-            Table.setFont(new Font("Arial", Font.PLAIN, 15));
-            Table.setSize(250, 370);
-            Table.setFillsViewportHeight(true);
-            scrol = new JScrollPane(Table);
-            scrol.setLocation(5, 20);
-            scrol.setSize(250, 370);
-            this.add(scrol);
-            Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-                @Override
-                public void valueChanged(ListSelectionEvent e) {
-                    int riga = Table.getSelectedRow();
-                    Lc.setText(String.format("codice: %d", ug.carrello.get(riga).getCodice()));
-                    Ln.setText("nome: " + ug.carrello.get(riga).getNome());
-                    Lm.setText("marca: " + ug.carrello.get(riga).getMarca());
-                    Lca.setText("categoria: " + ug.carrello.get(riga).getCategoria());
-                    Lp.setText(String.format("prezzo: %f", ug.carrello.get(riga).getPrezzo()));
-                    Lq.setText(String.format("quantità: %d", ug.carrello.get(riga).getQuantità()));
+            creazioneTabella();
 
-
-                    String a = ug.carrello.get(riga).getPercorsoImg();
-                    if (a == "")
-                        a = "default.png";
-                    ImageIcon icon = new ImageIcon(String.format("Esame/pic/Farmaci/%s", a));
-                    Image image = icon.getImage();
-                    Image Nimage = image.getScaledInstance(225, 145, Image.SCALE_SMOOTH);
-                    pic.setIcon(new ImageIcon(Nimage));
-                    pic.setSize(225, 145);
-                    pic.setLocation(270, 20);
-                    f.add(pic);
-                }
-            });
             Lc.setText("");
             Ln.setText("");
             Lm.setText("");
@@ -247,17 +170,15 @@ public class Carrello extends JFrame implements ActionListener {
                 String url = "http://localhost:8080/pagamento";
                 String response = Unirest.post(url)
                         .field("codice", String.format("%s", f.getCodice()))
-                        .field("quantità", String.format("%s", f.getQuantità()))
+                        .field("quantità", String.format("%s", f.getQuantita()))
                         .asString().getBody();
             }
             JOptionPane.showMessageDialog(null, "Pagamento andato a buon fine");
-
+            //andiamo ad aggiornare il file "miemedicine.txt"
             try {
                 File file = new File("Esame/FIle/miemedicine.txt");    //creates a new file instance
                 FileReader fr = new FileReader(file);   //reads the file
                 BufferedReader br = new BufferedReader(fr);  //creates a buffering character input stream
-
-
                 File ftmp = new File("Esame/FIle/tmp.txt");
                 FileWriter ftw = new FileWriter(ftmp);
                 FileReader ftr = new FileReader(ftmp);
@@ -282,7 +203,7 @@ public class Carrello extends JFrame implements ActionListener {
                             {
                                 if(arr3[0].equals(f.getNome()))
                                 {
-                                    arr3[1]= String.format("%d",f.getQuantità()+Integer.parseInt(arr3[1])) ;
+                                    arr3[1]= String.format("%d",f.getQuantita()+Integer.parseInt(arr3[1])) ;
                                     fiol.add(f);
                                     continue;
                                 }
@@ -299,7 +220,7 @@ public class Carrello extends JFrame implements ActionListener {
                                     vedo=true;
                             }
                             if(!vedo)
-                                modificata += String.format("%s¶%s¶%s¶%s¶%s§",fc.getNome(),fc.getQuantità(),"null","null","null");
+                                modificata += String.format("%s¶%s¶%s¶%s¶%s§",fc.getNome(),fc.getQuantita(),"null","null","null");
                         }
                         continue;
                     }
@@ -310,7 +231,7 @@ public class Carrello extends JFrame implements ActionListener {
                     modificata=String.format("%s☼",ug.getEmail());
                     for(Farmaco f : ug.carrello)
                     {
-                        modificata += String.format("%s¶%s¶%s¶%s¶%s§",f.getNome(),f.getQuantità(),"null","null","null");
+                        modificata += String.format("%s¶%s¶%s¶%s¶%s§",f.getNome(),f.getQuantita(),"null","null","null");
                     }
                 }
                 ftw.append(modificata);
@@ -331,7 +252,6 @@ public class Carrello extends JFrame implements ActionListener {
 
                 FileOutputStream delatet= new FileOutputStream(ftmp);
                 delatet.write(("").getBytes());
-
                 try {
                     delatet.close();
                     fr.close();
@@ -342,19 +262,53 @@ public class Carrello extends JFrame implements ActionListener {
                 {
                     ioException.printStackTrace();
                 }
-
-
             } catch (IOException ee) {
                 ee.printStackTrace();
             }
 
-
             ug.carrello.clear();
             dispose();
             new HomeCliente(ug);
-
-
         }
     }
+    private void creazioneTabella()
+    {
+        Table = new JTable(farmaci, colName) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
 
+        Table.setFont(new Font("Arial", Font.PLAIN, 15));
+        Table.setSize(250, 370);
+        Table.setFillsViewportHeight(true);
+        scrol = new JScrollPane(Table);
+        scrol.setLocation(5, 20);
+        scrol.setSize(250, 370);
+        this.add(scrol);
+        Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                int riga = Table.getSelectedRow();
+                Lc.setText(String.format("codice: %d", ug.carrello.get(riga).getCodice()));
+                Ln.setText("nome: " + ug.carrello.get(riga).getNome());
+                Lm.setText("marca: " + ug.carrello.get(riga).getMarca());
+                Lca.setText("categoria: " + ug.carrello.get(riga).getCategoria());
+                Lp.setText(String.format("prezzo: %f", ug.carrello.get(riga).getPrezzo()));
+                Lq.setText(String.format("quantità: %d", ug.carrello.get(riga).getQuantita()));
+
+                String a = ug.carrello.get(riga).getPercorsoImg();
+                if (a == "")
+                    a = "default.png";
+                ImageIcon icon = new ImageIcon(String.format("Esame/pic/Farmaci/%s", a));
+                Image image = icon.getImage();
+                Image Nimage = image.getScaledInstance(225, 145, Image.SCALE_SMOOTH);
+                pic.setIcon(new ImageIcon(Nimage));
+                pic.setSize(225, 145);
+                pic.setLocation(270, 20);
+                f.add(pic);
+            }
+        });
+    }
 }

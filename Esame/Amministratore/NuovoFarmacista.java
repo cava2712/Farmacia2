@@ -1,8 +1,6 @@
 package Esame.Amministratore;
 
 import Esame.Classi.DateLabelFormatter;
-import Esame.Clienti.HomeCliente;
-import Esame.Classi.Types;
 import Esame.Classi.Utente;
 import kong.unirest.Unirest;
 import org.jdatepicker.impl.JDatePanelImpl;
@@ -19,7 +17,11 @@ import java.io.*;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Properties;
-
+/**
+ * <p>Questa finestra viene utilizzata dall'"Amministratore" per la creazione di un nuovo "Farmacista"</p>
+ *
+ * @author Luca Barbieri, Davide Cavazzuti
+ **/
 public class NuovoFarmacista extends JFrame implements ActionListener {
     private final JTextField TextNome;
     private final JPasswordField TextPass;
@@ -38,7 +40,7 @@ public class NuovoFarmacista extends JFrame implements ActionListener {
     private final JDatePickerImpl Dat;
     private final JCheckBox CBO;
     String path = null;
-
+    Utente ug=null;
     public NuovoFarmacista(Utente u) {
         super("Nuovo Farmacista");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -47,6 +49,7 @@ public class NuovoFarmacista extends JFrame implements ActionListener {
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
         this.setLayout(null);
+        ug=u;
 
         Ln=new JLabel("Nome");
         Ln.setFont(new Font("Arial", Font.PLAIN, 30));
@@ -226,11 +229,9 @@ public class NuovoFarmacista extends JFrame implements ActionListener {
                 }
             }
 
-            Utente u = new Utente(Types.cliente, TextNome.getText(), String.valueOf(TextPass.getPassword()), TextCognome.getText(), TextEmail.getText(), TextCF.getText(), Pimg,data);
-
             dispose();
             try {
-                new HomeAmministratore(u);
+                new HomeAmministratore(ug);
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
@@ -240,9 +241,7 @@ public class NuovoFarmacista extends JFrame implements ActionListener {
             int option = open.showOpenDialog(this);
             if (option == JFileChooser.APPROVE_OPTION) {
                 path = open.getSelectedFile().getAbsolutePath();
-
                 Img.setText(path);
-
             }
         }
         if (e.getSource() == CBO) {

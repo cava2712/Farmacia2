@@ -7,7 +7,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+/**
+ * <p>Questa è la finestra di home del cliente </p>
+ *
+ * @author Luca Barbieri, Davide Cavazzuti
+ **/
 public class HomeCliente extends JFrame implements ActionListener {
     private final JButton BtnMed;
     private final JButton BtnGuariscimi;
@@ -32,6 +36,7 @@ public class HomeCliente extends JFrame implements ActionListener {
         this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
         this.setLayout(null);
         ug=u;
+
         MenuBar= new JMenuBar();
         Opzioni = new  JMenu("opzioni");
         Carrello = new  JMenuItem(String.format("Carrello:%d",u.numCarrello()));
@@ -48,35 +53,42 @@ public class HomeCliente extends JFrame implements ActionListener {
         utente.setSize(400, 30);
         utente.setLocation(45, 10);
         this.add(utente);
+
         BtnMed = new JButton("MIE MEDICINE");
         BtnMed.setSize(200,200);
         BtnMed.setLocation(45,50);
+        this.add(BtnMed);
+
         BtnGuariscimi= new JButton("GUARISCIMI");
         BtnGuariscimi.setSize(200,200);
         BtnGuariscimi.setLocation(295,50);
+        this.add(BtnGuariscimi);
+
         BtnContatta = new JButton("CONTATTA");
         BtnContatta.setSize(200,200);
         BtnContatta.setLocation(545,50);
-        this.add(BtnMed);
-        this.add(BtnGuariscimi);
         this.add(BtnContatta);
+
         BtnRicetta = new JButton("IMMETTI RICETTA");
         BtnRicetta.setSize(200,200);
         BtnRicetta.setLocation(45,300);
+        this.add(BtnRicetta);
+
         BtnFarmaci = new JButton("TUTTI I FARMACI");
         BtnFarmaci.setSize(200,200);
         BtnFarmaci.setLocation(295,300);
+        this.add(BtnFarmaci);
+
         BtnProfilo = new JButton("PROFILO");
         BtnProfilo.setSize(200,200);
         BtnProfilo.setLocation(545,300);
-        this.add(BtnRicetta);
-        this.add(BtnFarmaci);
         this.add(BtnProfilo);
 
         BtnDisc = new JButton("Disconnettiti");
         BtnDisc.setSize(200,50);
         BtnDisc.setLocation(545,550);
         this.add(BtnDisc);
+
         BtnProfilo.addActionListener(this);
         BtnDisc.addActionListener(this);
         BtnFarmaci.addActionListener(this);
@@ -84,6 +96,8 @@ public class HomeCliente extends JFrame implements ActionListener {
         BtnMed.addActionListener(this);
         BtnRicetta.addActionListener(this);
         Carrello.addActionListener(this);
+        Disconnetti.addActionListener(this);
+        Profilo.addActionListener(this);
         setVisible(true);
     }
 
@@ -109,6 +123,16 @@ public class HomeCliente extends JFrame implements ActionListener {
                 exception.printStackTrace();
             }
         }
+        if(e.getSource()== Disconnetti)
+        {
+            dispose();
+            new loginInterface();
+        }
+        if(e.getSource()== Profilo)
+        {
+            dispose();
+            new Profilo(ug);
+        }
         if (e.getSource() == BtnDisc) {
             dispose();
             new loginInterface();
@@ -130,5 +154,4 @@ public class HomeCliente extends JFrame implements ActionListener {
             }
         }
     }
-
 }

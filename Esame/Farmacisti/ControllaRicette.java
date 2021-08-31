@@ -1,22 +1,24 @@
 package Esame.Farmacisti;
 
-import javax.swing.*;
-import java.awt.*;
-
 import Esame.Classi.Utente;
-import Esame.Clienti.HomeCliente;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
+import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
-import java.util.*;
-
+import java.util.ArrayList;
+/**
+ * <p>Questa è la finestra dove il farmacista attuale può gestire tutte le ricette di tutti i clienti </p>
+ *
+ * @author Luca Barbieri, Davide Cavazzuti
+ **/
 public class ControllaRicette extends JFrame implements ActionListener {
     String[] colName= new String[] {"Cliente" , "Farmaco" };
     private  JLabel pic;
+    private  JLabel stat;
     private final JButton BtnBack;
     private final JButton BtnApprova;
     private final JButton BtnRifiuta;
@@ -26,15 +28,13 @@ public class ControllaRicette extends JFrame implements ActionListener {
     private  JScrollPane scrol;
     Object[][] ricette;
     String[] arr2;
-    String path = null;
-    boolean ricettevuoto=true;
-    ArrayList<String> cat =null;
-    ObjectMapper om = new ObjectMapper();
     Utente ug;
-    ArrayList<String> nome = new ArrayList<>();
-    ArrayList<String> farm = new ArrayList<>();
+    ArrayList<String> listaUtenti = new ArrayList<>();
+    ArrayList<String> listaFarmaci = new ArrayList<>();
+    ArrayList<String> listaStati = new ArrayList<>();
     int cont=0;
     int riga;
+
     public ControllaRicette(Utente u)
     {
         super(String.format("Immetti Ricetta"));
@@ -49,61 +49,46 @@ public class ControllaRicette extends JFrame implements ActionListener {
         pic.setSize(300, 300);
         pic.setLocation(400, 0);
         this.add(pic);
+        stat = new JLabel();
+        stat.setFont(new Font("Arial", Font.PLAIN, 20));
+        stat.setSize(300, 50);
+        stat.setLocation(400, 320);
+        this.add(stat);
+
         String NomeU;
         ricette = new Object[0][2];
-        //for per riempire ricette
-
+        //leggiamo il file per caricare tutte le ricette di tutti i clienti
         try
         {
             File file = new File("Esame/FIle/ricette.txt");    //creates a new file instance
             FileReader fr = new FileReader(file);   //reads the file
             BufferedReader br = new BufferedReader(fr);  //creates a buffering character input stream
             String line;
-            br.readLine();
             while((line=br.readLine())!=null)
             {
-                    String[] arr= line.split("☼");
-                    NomeU=arr[0];
-                    arr2 = arr[1].split("§");
-                    //ricette = new Object[arr2.length][2];
-                    for( int i =0; i< arr2.length; i++)
-                    {
-                        String[] arr3 = arr2[i].split("¶");
-                        nome.add(NomeU);
-                        farm.add(arr3[0]);
-                        cont++;
-                    }
+                String[] arr= line.split("☼");
+                NomeU=arr[0];
+                arr2 = arr[1].split("§");
+                for( int i =0; i< arr2.length; i++)
+                {
+                    String[] arr3 = arr2[i].split("¶");
+                    listaUtenti.add(NomeU);
+                    listaFarmaci.add(arr3[0]);
+                    listaStati.add(arr3[1]);
+                    cont++;
+                }
             }
         }
         catch (IOException ee) {
             ee.printStackTrace();
         }
-        ricette = new Object[nome.size()][2];
-        for (int i =0;i<nome.size();i++)
+        ricette = new Object[listaUtenti.size()][2];
+        for (int i = 0; i< listaUtenti.size(); i++)
         {
-            ricette[i][0]=nome.get(i);
-            ricette[i][1]=farm.get(i);
+            ricette[i][0]= listaUtenti.get(i);
+            ricette[i][1]= listaFarmaci.get(i);
         }
-        Table = new JTable(ricette,colName){
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
-        Table.setFont(new Font("Arial", Font.PLAIN, 15));
-        Table.setSize(390, 510);
-        Table.setFillsViewportHeight(true);
-        scrol=new JScrollPane(Table);
-        scrol.setLocation(5, 5);
-        scrol.setSize(390,510);
-        this.add(scrol);
-        Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-                EventoTabella();
-            }
-
-        });
+        creaTabella();
 
         BtnApprova = new JButton("Approva ricetta");
         BtnApprova.setFont(new Font("Arial", Font.PLAIN, 15));
@@ -163,20 +148,20 @@ public class ControllaRicette extends JFrame implements ActionListener {
                 while((line=br.readLine())!=null)
                 {
 
-                    if(line.startsWith(nome.get(riga))) // trovata linea dell'utente e creiamo linea nuova
+                    if(line.startsWith(listaUtenti.get(riga))) // trovata linea dell'utente e creiamo linea nuova
                     {
                         String[] arr= line.split("☼");
                         arr2 = arr[1].split("§");
-                        modificata=String.format("%s☼",nome.get(riga));
+                        modificata=String.format("%s☼", listaUtenti.get(riga));
                         for( int i =0; i< arr2.length; i++)
                         {
                             String[] arr3 = arr2[i].split("¶");
-                            if(farm.get(riga).compareTo(arr3[0])==0)
+                            if(listaFarmaci.get(riga).compareTo(arr3[0])==0)
                             {
                                 modificata += String.format("%s¶%s§",arr3[0],"approvata");
                             }
                             else
-                            modificata += arr2[i]+'§';
+                                modificata += arr2[i]+'§';
                         }
                         continue;
                     }
@@ -217,6 +202,7 @@ public class ControllaRicette extends JFrame implements ActionListener {
                 ee.printStackTrace();
             }
             JOptionPane.showMessageDialog(null, "Ricetta approvata!");
+            listaStati.set(riga,"approvata");
         }
         if (e.getSource() == BtnRifiuta)
         {
@@ -234,15 +220,15 @@ public class ControllaRicette extends JFrame implements ActionListener {
                 while((line=br.readLine())!=null)
                 {
 
-                    if(line.startsWith(nome.get(riga))) // trovata linea dell'utente e creiamo linea nuova
+                    if(line.startsWith(listaUtenti.get(riga))) // trovata linea dell'utente e creiamo linea nuova
                     {
                         String[] arr= line.split("☼");
                         arr2 = arr[1].split("§");
-                        modificata=String.format("%s☼",nome.get(riga));
+                        modificata=String.format("%s☼", listaUtenti.get(riga));
                         for( int i =0; i< arr2.length; i++)
                         {
                             String[] arr3 = arr2[i].split("¶");
-                            if(farm.get(riga).compareTo(arr3[0])==0)
+                            if(listaFarmaci.get(riga).compareTo(arr3[0])==0)
                             {
                                 modificata += String.format("%s¶%s§",arr3[0],"rifiutata");
                             }
@@ -287,7 +273,7 @@ public class ControllaRicette extends JFrame implements ActionListener {
             } catch (IOException ee) {
                 ee.printStackTrace();
             }
-
+            listaStati.set(riga,"rifiutata");
             JOptionPane.showMessageDialog(null, "Ricetta rifiutata!");
         }
         if (e.getSource() == BtnEliminaR)
@@ -306,15 +292,15 @@ public class ControllaRicette extends JFrame implements ActionListener {
                 while((line=br.readLine())!=null)
                 {
 
-                    if(line.startsWith(nome.get(riga))) // trovata linea dell'utente e creiamo linea nuova
+                    if(line.startsWith(listaUtenti.get(riga))) // trovata linea dell'utente e creiamo linea nuova
                     {
                         String[] arr= line.split("☼");
                         arr2 = arr[1].split("§");
-                        modificata=String.format("%s☼",nome.get(riga));
+                        modificata=String.format("%s☼", listaUtenti.get(riga));
                         for( int i =0; i< arr2.length; i++)
                         {
                             String[] arr3 = arr2[i].split("¶");
-                            if(farm.get(riga).compareTo(arr3[0])==0)
+                            if(listaFarmaci.get(riga).compareTo(arr3[0])==0)
                             {
 
                             }
@@ -359,47 +345,28 @@ public class ControllaRicette extends JFrame implements ActionListener {
             } catch (IOException ee) {
                 ee.printStackTrace();
             }
-            File fIm= new File(String.format("Esame/pic/Ricette/%s_%s.jpg",nome.get(riga),farm.get(riga)));
+            File fIm= new File(String.format("Esame/pic/Ricette/%s_%s.jpg", listaUtenti.get(riga), listaFarmaci.get(riga)));
             fIm.delete();
 
-            nome.remove(riga);
-            farm.remove(riga);
-            ricette = new Object[nome.size()][2];
-            for (int i =0;i<nome.size();i++)
+            listaUtenti.remove(riga);
+            listaFarmaci.remove(riga);
+            listaStati.remove(riga);
+            ricette = new Object[listaUtenti.size()][2];
+            for (int i = 0; i< listaUtenti.size(); i++)
             {
-                ricette[i][0]=nome.get(i);
-                ricette[i][1]=farm.get(i);
+                ricette[i][0]= listaUtenti.get(i);
+                ricette[i][1]= listaFarmaci.get(i);
             }
             scrol.remove(Table);
             this.remove(scrol);
-            Table = new JTable(ricette,colName){
-                @Override
-                public boolean isCellEditable(int row, int column) {
-                    return false;
-                }
-            };
-
-            Table.setFont(new Font("Arial", Font.PLAIN, 15));
-            Table.setSize(390, 510);
-            Table.setFillsViewportHeight(true);
-            scrol=new JScrollPane(Table);
-            scrol.setLocation(5, 5);
-            scrol.setSize(390,510);
-            this.add(scrol);
-            Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-                @Override
-                public void valueChanged(ListSelectionEvent e) {
-                    EventoTabella();
-                }
-
-            });
+            creaTabella();
 
             JOptionPane.showMessageDialog(null, "Ricetta eliminata!");
         }
         if (e.getSource() == BtnIngrandisci)
         {
             int riga=Table.getSelectedRow();
-            new ingrandisci(nome.get(riga),farm.get(riga));
+            new ingrandisci(listaUtenti.get(riga), listaFarmaci.get(riga));
 
         }
         if (e.getSource() == BtnBack)
@@ -408,13 +375,33 @@ public class ControllaRicette extends JFrame implements ActionListener {
             new HomeFarmacista(ug);
         }
     }
-    public void EventoTabella()
+    public void creaTabella()
     {
+        Table = new JTable(ricette,colName){
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        Table.setFont(new Font("Arial", Font.PLAIN, 15));
+        Table.setSize(390, 510);
+        Table.setFillsViewportHeight(true);
+        scrol=new JScrollPane(Table);
+        scrol.setLocation(5, 5);
+        scrol.setSize(390,510);
+        this.add(scrol);
+        Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
                 riga=Table.getSelectedRow();
-                ImageIcon icon = new ImageIcon(String.format("Esame/pic/Ricette/%s_%s.jpg",nome.get(riga),farm.get(riga)));
+                stat.setText(String.format("Stato: %s",listaStati.get(riga)));
+                ImageIcon icon = new ImageIcon(String.format("Esame/pic/Ricette/%s_%s.jpg", listaUtenti.get(riga), listaFarmaci.get(riga)));
                 Image image = icon.getImage();
                 Image Nimage = image.getScaledInstance(300,300, Image.SCALE_SMOOTH);
                 pic.setIcon(new ImageIcon(Nimage));
-                return;
+            }
+
+        });
     }
 }

@@ -1,8 +1,7 @@
-package Esame.Clienti;
+package Esame.Farmacisti;
 
 import Esame.Classi.DateLabelFormatter;
 import Esame.Classi.Utente;
-import Esame.Farmacisti.HomeFarmacista;
 import kong.unirest.Unirest;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
@@ -17,7 +16,11 @@ import java.awt.event.ItemListener;
 import java.io.*;
 import java.util.Date;
 import java.util.Properties;
-
+/**
+ * <p>Questa è la finestra dove un farmacista può gestire il suo proilo e i suoi dati</p>
+ *
+ * @author Luca Barbieri, Davide Cavazzuti
+ **/
 public class ProfiloF extends JFrame implements ActionListener {
     private final JTextField TextNome;
     private final JTextField TextPass;
@@ -42,8 +45,8 @@ public class ProfiloF extends JFrame implements ActionListener {
     Utente ug=null;
     String path = null;
     String Pimg = null;
-    public ProfiloF(Utente u) {
 
+    public ProfiloF(Utente u) {
         super(String.format("Profilo di %s",u.getNome()));
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setSize(700, 700);
@@ -53,6 +56,7 @@ public class ProfiloF extends JFrame implements ActionListener {
         this.setLayout(null);
         ug=u;
         emailp=u.getEmail();
+
         ModificaImmagine=new JButton("Scegli un'altra immagine");
         ModificaImmagine.setFont(new Font("Arial", Font.PLAIN, 15));
         ModificaImmagine.setSize(200, 30);
@@ -70,7 +74,6 @@ public class ProfiloF extends JFrame implements ActionListener {
         CBO.setLocation(250, 100);
         this.add(CBO);
         CBO.addItemListener(new ItemListener(){
-
             @Override
             public void itemStateChanged(ItemEvent e)
             {
@@ -206,13 +209,11 @@ public class ProfiloF extends JFrame implements ActionListener {
         ModificaImmagine.addActionListener(this);
 
         setVisible(true);
-
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == ModificaImmagine) {
-
             JFileChooser open = new JFileChooser();
             int option = open.showOpenDialog(this);
             if (option == JFileChooser.APPROVE_OPTION) {
@@ -237,7 +238,6 @@ public class ProfiloF extends JFrame implements ActionListener {
             CBO.setEnabled(true);
             if(ug.getImg().equals("default.png"))
                 CBO.setSelected(true);
-
         }
         if (e.getSource() == Aggiorna) {
             //qua prendiamo i dati e poi facciamo la query
@@ -277,6 +277,7 @@ public class ProfiloF extends JFrame implements ActionListener {
             TextEmail.setEditable(false);
             TextPass.setEditable(false);
             emailp=ug.getEmail();
+
             JOptionPane.showMessageDialog(null, "Dati aggiornati correttamente");
 
             InputStream is = null;
@@ -302,8 +303,6 @@ public class ProfiloF extends JFrame implements ActionListener {
                         ioException.printStackTrace();
                     }
                 }
-
-
             }
             String a = ug.getImg();
             ImageIcon icon = new ImageIcon(String.format("Esame/pic/Utenti/%s",a));
@@ -314,6 +313,4 @@ public class ProfiloF extends JFrame implements ActionListener {
             CBO.setEnabled(false);
         }
     }
-
-
 }

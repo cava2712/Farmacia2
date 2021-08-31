@@ -1,8 +1,8 @@
 package Esame.Clienti;
 
 import Esame.Classi.DateLabelFormatter;
-import Esame.Classi.Farmaco;
 import Esame.Classi.Utente;
+import Esame.Login.loginInterface;
 import org.eclipse.jetty.util.ArrayUtil;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
@@ -20,7 +20,11 @@ import java.awt.event.ActionListener;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.util.*;
-
+/**
+ * <p>Questa è la finestra dove l'attuale cliente può gestire tutte le sue medicine acquistate </p>
+ *
+ * @author Luca Barbieri, Davide Cavazzuti
+ **/
 public class MieMedicine extends JFrame implements ActionListener {
     String[] colName= new String[] { "NomeProdotto","Quantità"};
     private  JTable Table;
@@ -40,16 +44,12 @@ public class MieMedicine extends JFrame implements ActionListener {
     private final JTextArea Header;
     private final JTextArea Descrizione;
     private final JTextField Mquantità;
-
-    String NomeU;
-    ArrayList<Farmaco> far =null;
-    int cont=0;
     Object[][] farmaci;
     Utente ug;
     JFrame f;
     String[] arr2;
-    public MieMedicine(Utente u){
 
+    public MieMedicine(Utente u){
         super("Mie medicine");
         ug=u;
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -148,19 +148,19 @@ public class MieMedicine extends JFrame implements ActionListener {
         BtnModifica.addActionListener(this);
         BtnSalva.addActionListener(this);
         Back.addActionListener(this);
+        Disconnetti.addActionListener(this);
+        Profilo.addActionListener(this);
         Carrello.addActionListener(this);
         Descrizione.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
                 if(Descrizione.getDocument().getLength()> 500)
                 {
-                    Runnable r = new Runnable() {
+                    Runnable r = new Runnable() { //controlla che la descrizione non sia più lunga di 500 caratteri
                         @Override
                         public void run() {
                             int leng = Descrizione.getDocument().getLength();
-
                             JOptionPane.showMessageDialog(null, "puoi inserire al massimo 500 caratteri nella descrizione");
-
                             try {
                                 for(int i =0; i<leng-500;i++)
                                     Descrizione.getDocument().remove(leng-1-i,1);
@@ -172,25 +172,19 @@ public class MieMedicine extends JFrame implements ActionListener {
                     SwingUtilities.invokeLater(r);
                 }
             }
-
             @Override
             public void removeUpdate(DocumentEvent e) {
-
             }
-
             @Override
             public void changedUpdate(DocumentEvent e) {
-
             }
         });
 
-
         try {
-            File file = new File("Esame/FIle/miemedicine.txt");    //creates a new file instance
-            FileReader fr = new FileReader(file);   //reads the file
-            BufferedReader br = new BufferedReader(fr);  //creates a buffering character input stream
+            File file = new File("Esame/FIle/miemedicine.txt");
+            FileReader fr = new FileReader(file);
+            BufferedReader br = new BufferedReader(fr);
             String line;
-
 
             while((line=br.readLine())!=null)
             {
@@ -210,25 +204,8 @@ public class MieMedicine extends JFrame implements ActionListener {
             }
             if(farmaci == null)
                 farmaci =new Object[0][2];
-            Table = new JTable(farmaci,colName){
-                @Override
-                public boolean isCellEditable(int row, int column) {
-                    return false;
-                }
-            };
-            Table.setFont(new Font("Arial", Font.PLAIN, 15));
-            Table.setSize(250, 400);
-            Table.setFillsViewportHeight(true);
-            scrol=new JScrollPane(Table);
-            scrol.setLocation(5, 130);
-            scrol.setSize(250,400);
-            this.add(scrol);
-            Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-                @Override
-                public void valueChanged(ListSelectionEvent e) {
-                    EventoTabella();
-                }
-            });
+            creaTabella();
+
             try {
                 fr.close();
             }
@@ -255,7 +232,16 @@ public class MieMedicine extends JFrame implements ActionListener {
             }
 
         }
-
+        if(e.getSource()== Disconnetti)
+        {
+            dispose();
+            new loginInterface();
+        }
+        if(e.getSource()== Profilo)
+        {
+            dispose();
+            new Profilo(ug);
+        }
         if (e.getSource() == BtnModifica) {
             int riga=Table.getSelectedRow();
             String fzero="";
@@ -280,7 +266,6 @@ public class MieMedicine extends JFrame implements ActionListener {
                 JOptionPane.showMessageDialog(null, "la quantità modificata non può essere superiore alla quantità posseduta");
                 return;
             }
-
 
             try {
                 File file = new File("Esame/FIle/miemedicine.txt");    //creates a new file instance
@@ -370,25 +355,8 @@ public class MieMedicine extends JFrame implements ActionListener {
             }
             scrol.remove(Table);
             this.remove(scrol);
-            Table = new JTable(farmaci,colName){
-                @Override
-                public boolean isCellEditable(int row, int column) {
-                    return false;
-                }
-            };
-            Table.setFont(new Font("Arial", Font.PLAIN, 15));
-            Table.setSize(250, 400);
-            Table.setFillsViewportHeight(true);
-            scrol=new JScrollPane(Table);
-            scrol.setLocation(5, 130);
-            scrol.setSize(250,400);
-            this.add(scrol);
-            Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-                @Override
-                public void valueChanged(ListSelectionEvent e) {
-                    EventoTabella();
-                }
-            });
+            creaTabella();
+
             if(zero) {
                 int result = JOptionPane.showConfirmDialog(this, String.format("Il farmaco %s è finito! \n vuoi comprarlo di nuovo?", fzero), "Attenzione!",
                         JOptionPane.YES_NO_OPTION,
@@ -507,51 +475,69 @@ public class MieMedicine extends JFrame implements ActionListener {
             new HomeCliente(ug);
         }
     }
-    public String DataToString ( Date d)
+    public String DataToString ( Date d) //passo la data e mi restituisce la stringa formattata
     {
         Calendar c = Calendar.getInstance();
         c.setTime(d);
         return String.format("%s-%s-%s",c.get(Calendar.YEAR),c.get(Calendar.MONTH),c.get(Calendar.DAY_OF_MONTH));
     }
-    public void EventoTabella()
+    public void creaTabella()
     {
-        Descrizione.setText("");
-        Descrizione.setEditable(true);
-        DataIn.getModel().setSelected(false);
-        DataFin.getModel().setSelected(false);
-        for( int i =0; i< arr2.length; i++)
-        {
-            int riga=Table.getSelectedRow();
-            if (riga==i)
-            {
-                String[] arr3 = arr2[i].split("¶");
-                if(arr3[4].equals("null"))
-                {
-                    if(arr3[2].equals("null"))
-                    {
-                        Header.setText(String.format("La terapia del farmaco %s inizia il NON DEFINITO e finisce il NON DEFINITO", arr3[0]));
-                    }
-                    Descrizione.setText("");
-                    return;
-                }
-                if(arr3[2].equals("null"))
-                {
-                    Header.setText(String.format("La terapia del farmaco %s inizia il NON DEFINITO e finisce il NON DEFINITO", arr3[0]));
-                    return;
-                }
-
-                String[] dataIn = arr3[2].split("-");
-                String[] dataFin = arr3[3].split("-");
-                Header.setText(String.format("La terapia del farmaco %s inizia il %s-%s-%s e finisce il %s-%s-%s", arr3[0], dataIn[2],Integer.parseInt(dataIn[1])+1,dataIn[0],dataFin[2],Integer.parseInt(dataFin[1])+1,dataFin[0]));
-                Descrizione.setText((arr3[4]));
-
-                DataIn.getModel().setDate(Integer.parseInt(dataIn[0]),Integer.parseInt(dataIn[1]),Integer.parseInt(dataIn[2]));
-                DataFin.getModel().setDate(Integer.parseInt(dataFin[0]),Integer.parseInt(dataFin[1]),Integer.parseInt(dataFin[2]));
-                DataIn.getModel().setSelected(true);
-                DataFin.getModel().setSelected(true);
-                return;
+        Table = new JTable(farmaci,colName){
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
             }
-        }
+        };
+        Table.setFont(new Font("Arial", Font.PLAIN, 15));
+        Table.setSize(250, 400);
+        Table.setFillsViewportHeight(true);
+        scrol=new JScrollPane(Table);
+        scrol.setLocation(5, 130);
+        scrol.setSize(250,400);
+        this.add(scrol);
+        Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                Descrizione.setText("");
+                Descrizione.setEditable(true);
+                DataIn.getModel().setSelected(false);
+                DataFin.getModel().setSelected(false);
+                for( int i =0; i< arr2.length; i++)
+                {
+                    int riga=Table.getSelectedRow();
+                    if (riga==i)
+                    {
+                        String[] arr3 = arr2[i].split("¶");
+                        if(arr3[4].equals("null"))
+                        {
+                            if(arr3[2].equals("null"))
+                            {
+                                Header.setText(String.format("La terapia del farmaco %s inizia il NON DEFINITO e finisce il NON DEFINITO", arr3[0]));
+                            }
+                            Descrizione.setText("");
+                            return;
+                        }
+                        if(arr3[2].equals("null"))
+                        {
+                            Header.setText(String.format("La terapia del farmaco %s inizia il NON DEFINITO e finisce il NON DEFINITO", arr3[0]));
+                            return;
+                        }
+
+                        String[] dataIn = arr3[2].split("-");
+                        String[] dataFin = arr3[3].split("-");
+                        Header.setText(String.format("La terapia del farmaco %s inizia il %s-%s-%s e finisce il %s-%s-%s", arr3[0], dataIn[2],Integer.parseInt(dataIn[1])+1,dataIn[0],dataFin[2],Integer.parseInt(dataFin[1])+1,dataFin[0]));
+                        Descrizione.setText((arr3[4]));
+
+                        DataIn.getModel().setDate(Integer.parseInt(dataIn[0]),Integer.parseInt(dataIn[1]),Integer.parseInt(dataIn[2]));
+                        DataFin.getModel().setDate(Integer.parseInt(dataFin[0]),Integer.parseInt(dataFin[1]),Integer.parseInt(dataFin[2]));
+                        DataIn.getModel().setSelected(true);
+                        DataFin.getModel().setSelected(true);
+                        return;
+                    }
+                }
+            }
+        });
     }
 
 }

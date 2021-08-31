@@ -2,6 +2,7 @@ package Esame.Clienti;
 
 import Esame.Classi.Farmaco;
 import Esame.Classi.Utente;
+import Esame.Login.loginInterface;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import kong.unirest.Unirest;
@@ -14,7 +15,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.util.ArrayList;
-
+/**
+ * <p>Questa è la finestra chiamata "Guariscimi" perchè il cliente può filtrare i farmaci in base alla categoria </p>
+ *
+ * @author Luca Barbieri, Davide Cavazzuti
+ **/
 public class Guariscimi extends JFrame implements ActionListener {
     private final JComboBox Filtra;
     String[] colName= new String[] { "codice","Name" ,"Price" };
@@ -36,22 +41,20 @@ public class Guariscimi extends JFrame implements ActionListener {
     private final JButton Add;
     private final JTextField Qnt;
     private final JButton Back;
-    ArrayList<Farmaco> far =null;
-    ArrayList<String> cat =null;
+    ArrayList<Farmaco> listaFarmaci =null;
+    ArrayList<String> listaCategorie =null;
     private  JScrollPane scrol;
     int cont=0;
     Object[][] farmaci;
     Utente ug;
     JFrame f;
-    ArrayList<String> farm = new ArrayList<>();
-    ArrayList<String> acc = new ArrayList<>();
+    ArrayList<String> ricetteUtente = new ArrayList<>();
+    ArrayList<String> statoRicette = new ArrayList<>();
     String[] arr2;
-    String NomeU;
     ObjectMapper om = new ObjectMapper();
 
-
     public Guariscimi(Utente u) throws Exception {
-        super("Tutti i Farmaci");
+        super("Guariscimi");
         ug=u;
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setSize(800, 800);
@@ -89,11 +92,11 @@ public class Guariscimi extends JFrame implements ActionListener {
         String url = "http://localhost:8080/categorie";
         String json = Unirest.get(url).asString().getBody();
         try {
-            cat = om.readValue(json, listType);
+            listaCategorie = om.readValue(json, listType);
         } catch (Exception e) {
             throw new Exception(e);
         }
-        for (String s:cat)
+        for (String s:listaCategorie)
         {
             Filtra.addItem(s);
         }
@@ -104,96 +107,72 @@ public class Guariscimi extends JFrame implements ActionListener {
         url = "http://localhost:8080/farmaci";
         json = Unirest.get(url).asString().getBody();
         try {
-            far = om.readValue(json, listType);
+            listaFarmaci = om.readValue(json, listType);
         } catch (Exception e) {
             throw new Exception(e);
         }
-
-        for (Farmaco f: far)
+        farmaci = new Object[listaFarmaci.size()][3];
+        for(int i=0;i<listaFarmaci.size();i++)
         {
-            cont++;
+            farmaci[i][0]= listaFarmaci.get(i).getCodice();
+            farmaci[i][1]= listaFarmaci.get(i).getNome();
+            farmaci[i][2]= listaFarmaci.get(i).getPrezzo();
         }
-        farmaci = new Object[cont][3];
-        for(int i=0;i<cont;i++)
+        if(u.numCarrello() != 0)//aggiornamento lista farmaci per quando torni da un'altra finestra
         {
-            farmaci[i][0]= far.get(i).getCodice();
-            farmaci[i][1]= far.get(i).getNome();
-            farmaci[i][2]= far.get(i).getPrezzo();
-        }
-        Table = new JTable(farmaci,colName){
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
+            for (Farmaco f: u.carrello)
+            {
+                Farmaco temp=listaFarmaci.stream().filter(farmaco -> f.getCodice()==farmaco.getCodice()).findFirst().orElse(null);
+                listaFarmaci.get(listaFarmaci.indexOf(temp)).setQuantita(listaFarmaci.get(listaFarmaci.indexOf(temp)).getQuantita()-f.getQuantita());
             }
-        };
-
-
+        }
         pic= new JLabel();
         pic.setLocation(415, 90);
         f.add(pic);
 
         Lc= new JLabel();
-        Lc.setFont(new Font("Arial", Font.PLAIN, 30));
+        Lc.setFont(new Font("Arial", Font.PLAIN, 20));
         Lc.setSize(400, 30);
         Lc.setLocation(415, 300);
         this.add(Lc);
 
-
         Ln= new JLabel();
-        Ln.setFont(new Font("Arial", Font.PLAIN, 30));
+        Ln.setFont(new Font("Arial", Font.PLAIN, 20));
         Ln.setSize(400, 30);
         Ln.setLocation(415, 350);
         this.add(Ln);
 
-
         Lm= new JLabel();
-        Lm.setFont(new Font("Arial", Font.PLAIN, 30));
+        Lm.setFont(new Font("Arial", Font.PLAIN, 20));
         Lm.setSize(400, 30);
         Lm.setLocation(415, 400);
         this.add(Lm);
 
-
         Lca= new JLabel();
-        Lca.setFont(new Font("Arial", Font.PLAIN, 30));
+        Lca.setFont(new Font("Arial", Font.PLAIN, 20));
         Lca.setSize(400, 30);
         Lca.setLocation(415, 450);
         this.add(Lca);
 
-
         Lp= new JLabel();
-        Lp.setFont(new Font("Arial", Font.PLAIN, 30));
+        Lp.setFont(new Font("Arial", Font.PLAIN, 20));
         Lp.setSize(400, 30);
         Lp.setLocation(415, 500);
         this.add(Lp);
 
-
         Lq= new JLabel();
-        Lq.setFont(new Font("Arial", Font.PLAIN, 30));
+        Lq.setFont(new Font("Arial", Font.PLAIN, 20));
         Lq.setSize(400, 30);
         Lq.setLocation(415, 550);
         this.add(Lq);
 
         Lr= new JLabel();
-        Lr.setFont(new Font("Arial", Font.PLAIN, 30));
+        Lr.setFont(new Font("Arial", Font.PLAIN, 20));
         Lr.setSize(400, 30);
         Lr.setLocation(415, 600);
         this.add(Lr);
 
-
-        Table.setFont(new Font("Arial", Font.PLAIN, 15));
-        Table.setSize(400, 500);
-        Table.setFillsViewportHeight(true);
-        scrol=new JScrollPane(Table);
-        scrol.setLocation(5, 100);
-        scrol.setSize(400,500);
-        this.add(scrol);
-        Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-                EventoTabella();
-            }
-
-        });
+        creazioneTabella();
 
         Back= new JButton("Back");
         Back.setFont(new Font("Arial", Font.PLAIN, 30));
@@ -217,7 +196,7 @@ public class Guariscimi extends JFrame implements ActionListener {
             public void actionPerformed(ActionEvent e) {
                 cont=0;
                 ArrayList<Farmaco> fcat = new ArrayList<Farmaco>();
-                for (Farmaco f: far)
+                for (Farmaco f: listaFarmaci)
                 {
                     if(f.getCategoria().equals(Filtra.getSelectedItem()))
                     {
@@ -234,64 +213,38 @@ public class Guariscimi extends JFrame implements ActionListener {
                 }
                 scrol.remove(Table);
                 f.remove(scrol);
-                Table = new JTable(farmaci,colName){
-                    @Override
-                    public boolean isCellEditable(int row, int column) {
-                        return false;
-                    }
-                };
-                Table.setFont(new Font("Arial", Font.PLAIN, 15));
-                Table.setSize(400, 500);
-                Table.setFillsViewportHeight(true);
-                scrol=new JScrollPane(Table);
-                scrol.setLocation(5, 100);
-                scrol.setSize(400,500);
-                f.add(scrol);
-                Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-                    @Override
-                    public void valueChanged(ListSelectionEvent e) {
-                        EventoTabella();
-                    }
-
-                });
+                creazioneTabella();
             }
         });
         Add.addActionListener(this);
         Back.addActionListener(this);
         Carrello.addActionListener(this);
+        Disconnetti.addActionListener(this);
+        Profilo.addActionListener(this);
         setVisible(true);
-        if(u.numCarrello() != 0)//aggiornamento lista farmaci per quando torni da un'altra finestra
-        {
-            for (Farmaco f: u.carrello)
-            {
-                far.get(f.getCodice()).setQuantità(far.get(f.getCodice()).getQuantità()-f.getQuantità());
+
+        try {
+            File file = new File("Esame/FIle/ricette.txt");
+            FileReader fr = new FileReader(file);
+            BufferedReader br = new BufferedReader(fr);
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] arr = line.split("☼");
+                if(arr[0].equals(ug.getEmail()))
+                {
+                    arr2 = arr[1].split("§");
+                    for (int i = 0; i < arr2.length; i++) {
+                        String[] arr3 = arr2[i].split("¶");
+                        ricetteUtente.add(arr3[0]);
+                        statoRicette.add(arr3[1]);
+                    }
+                }
             }
+        } catch (FileNotFoundException fileNotFoundException) {
+            fileNotFoundException.printStackTrace();
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
         }
-    }
-
-    private void EventoTabella() {
-        int riga=Table.getSelectedRow();
-        Lc.setText(String.format("codice: %d",far.get(riga).getCodice()));
-        Ln.setText("nome: "+far.get(riga).getNome());
-        Lm.setText("marca: "+far.get(riga).getMarca());
-        Lca.setText("categoria: "+far.get(riga).getCategoria());
-        Lp.setText(String.format("prezzo: %f",far.get(riga).getPrezzo()));
-        Lq.setText(String.format("quantità: %d",far.get(riga).getQuantità()));
-        if(far.get(riga).getRicetta().compareTo("true")==0)
-            Lr.setText("Ricetta: necessaria");
-        else
-            Lr.setText("Ricetta: non necessaria");
-
-        String a = far.get(riga).getPercorsoImg();
-        if(a=="")
-            a="default.png";
-        ImageIcon icon = new ImageIcon(String.format("Esame/pic/Farmaci/%s",a));
-        Image image = icon.getImage();
-        Image Nimage = image.getScaledInstance(300,250, Image.SCALE_SMOOTH);
-        pic.setIcon(new ImageIcon(Nimage));
-        pic.setSize(300, 250);
-        pic.setLocation(415, 50);
-        f.add(pic);
     }
 
     @Override
@@ -308,6 +261,8 @@ public class Guariscimi extends JFrame implements ActionListener {
         if(e.getSource() == Add)
         {
             int riga=Table.getSelectedRow();
+            int sCodice= (int)farmaci[riga][0];
+            Farmaco sFarmaco=listaFarmaci.stream().filter(farmaco -> sCodice==farmaco.getCodice()).findFirst().orElse(null); //farmaco selezionato dalla tabella
             if(riga==-1)
             {
                 JOptionPane.showMessageDialog(null, "nessuna riga selezionata!");
@@ -321,45 +276,25 @@ public class Guariscimi extends JFrame implements ActionListener {
                 Qnt.setText("");
                 return;
             }
-            if(far.get(riga).getRicetta().equals("true"))
+            //verifichiamo se il farmaco che sta provando a comprare necessita di "Ricetta"
+            if(sFarmaco.getRicetta().equals("true"))
             {
-                try {
-                    File file = new File("Esame/FIle/ricette.txt");    //creates a new file instance
-                    FileReader fr = new FileReader(file);   //reads the file
-                    BufferedReader br = new BufferedReader(fr);  //creates a buffering character input stream
-                    String line;
-                    br.readLine();
-                    while ((line = br.readLine()) != null) {
-                        String[] arr = line.split("☼");
-                        NomeU = arr[0];
-                        arr2 = arr[1].split("§");
-                        //ricette = new Object[arr2.length][2];
-                        for (int i = 0; i < arr2.length; i++) {
-                            String[] arr3 = arr2[i].split("¶");
-                            if(NomeU.equals(ug.getNome()))
-                            {
-                                farm.add(arr3[0]);
-                                acc.add(arr3[1]);
-                            }
-                        }
-                    }
-                } catch (FileNotFoundException fileNotFoundException) {
-                    fileNotFoundException.printStackTrace();
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                }
                 Boolean trovata=false;
-                for (int i =0;i< farm.size();i++)
+                for (int i = 0; i< ricetteUtente.size(); i++)
                 {
-                    if(farm.get(i).equals(far.get(riga).getNome()))
+                    if(ricetteUtente.get(i).equals(sFarmaco.getNome()))
                     {
-                        if(acc.get(i).equals("approvata"))
+                        if(statoRicette.get(i).equals("approvata")) {
                             JOptionPane.showMessageDialog(null, "La tua ricetta è stata approvata!");
-
-                        else if(acc.get(i).equals("rifiutata"))
+                        }
+                        else if(statoRicette.get(i).equals("rifiutata")) {
                             JOptionPane.showMessageDialog(null, "La tua ricetta non è stata approvata!");
-                        else
+                            return;
+                        }
+                        else {
                             JOptionPane.showMessageDialog(null, "La tua ricetta non è ancora stata visionata!");
+                            return;
+                        }
                         trovata=true;
                         break;
                     }
@@ -370,38 +305,38 @@ public class Guariscimi extends JFrame implements ActionListener {
                     return;
                 }
             }
-            if(far.get(riga).getQuantità() >= Integer.parseInt(Qnt.getText())) {
-                //creo un nuovo farmaco con la dimensione nuova da aggiungere al carrello
+            if(sFarmaco.getQuantita() >= Integer.parseInt(Qnt.getText())) {
+                //creo un nuovo farmaco con la dimensione nuova da aggiungere al carrello se non era già presente
                 boolean trovato= false;
                 for( Farmaco f :ug.carrello)
                 {
-                    if(f.getCodice()==far.get(riga).getCodice())
+                    if(f.getCodice()== sFarmaco.getCodice())
                     {
-                        f.setQuantità(f.getQuantità()+ Integer.parseInt(Qnt.getText()));
+                        f.setQuantita(f.getQuantita()+ Integer.parseInt(Qnt.getText()));
                         trovato = true;
                     }
                 }
                 if(!trovato)
                 {
                     Farmaco agg = new Farmaco();
-                    agg.setCodice(far.get(riga).getCodice());
-                    agg.setCategoria(far.get(riga).getCategoria());
-                    agg.setMarca(far.get(riga).getMarca());
-                    agg.setNome(far.get(riga).getNome());
-                    agg.setPrezzo(far.get(riga).getPrezzo());
-                    agg.setPercorsoImg(far.get(riga).getPercorsoImg());
-                    agg.setQuantità(Integer.parseInt(Qnt.getText()));
+                    agg.setCodice(sFarmaco.getCodice());
+                    agg.setCategoria(sFarmaco.getCategoria());
+                    agg.setMarca(sFarmaco.getMarca());
+                    agg.setNome(sFarmaco.getNome());
+                    agg.setPrezzo(sFarmaco.getPrezzo());
+                    agg.setPercorsoImg(sFarmaco.getPercorsoImg());
+                    agg.setQuantita(Integer.parseInt(Qnt.getText()));
                     ug.carrello.add(agg);
                 }
             }
             else
             {
-                JOptionPane.showMessageDialog(null, String.format("non ci sono abbastanza %s",far.get(riga).getNome()));
+                JOptionPane.showMessageDialog(null, String.format("non ci sono abbastanza %s", sFarmaco.getNome()));
                 Qnt.setText("");
                 return;
             }
-            int q=far.get(riga).getQuantità()- Integer.parseInt(Qnt.getText());
-            far.get(riga).setQuantità(q);
+            int q= sFarmaco.getQuantita()- Integer.parseInt(Qnt.getText());
+            listaFarmaci.get(listaFarmaci.indexOf(sFarmaco)).setQuantita(q);
             Lq.setText(String.format("quantità: %d",q));
             Carrello.setText(String.format("Carrello:%d",ug.numCarrello()));
         }
@@ -409,6 +344,60 @@ public class Guariscimi extends JFrame implements ActionListener {
             dispose();
             new HomeCliente(ug);
         }
+        if(e.getSource()== Disconnetti)
+        {
+            dispose();
+            new loginInterface();
+        }
+        if(e.getSource()== Profilo)
+        {
+            dispose();
+            new Profilo(ug);
+        }
     }
 
+    private void creazioneTabella() {
+        Table = new JTable(farmaci,colName){
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        Table.setFont(new Font("Arial", Font.PLAIN, 15));
+        Table.setSize(400, 500);
+        Table.setFillsViewportHeight(true);
+        scrol=new JScrollPane(Table);
+        scrol.setLocation(5, 100);
+        scrol.setSize(400,500);
+        f.add(scrol);
+        Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                int riga=Table.getSelectedRow();
+                int sCodice= (int)farmaci[riga][0];
+                Farmaco sFarmaco=listaFarmaci.stream().filter(farmaco -> sCodice==farmaco.getCodice()).findFirst().orElse(null);
+                Lc.setText(String.format("codice: %d", sFarmaco.getCodice()));
+                Ln.setText("nome: "+ sFarmaco.getNome());
+                Lm.setText("marca: "+ sFarmaco.getMarca());
+                Lca.setText("categoria: "+ sFarmaco.getCategoria());
+                Lp.setText(String.format("prezzo: %f", sFarmaco.getPrezzo()));
+                Lq.setText(String.format("quantità: %d", sFarmaco.getQuantita()));
+                if(sFarmaco.getRicetta().compareTo("true")==0)
+                    Lr.setText("Ricetta: necessaria");
+                else
+                    Lr.setText("Ricetta: non necessaria");
+
+                String a = sFarmaco.getPercorsoImg();
+                if(a=="")
+                    a="default.png";
+                ImageIcon icon = new ImageIcon(String.format("Esame/pic/Farmaci/%s",a));
+                Image image = icon.getImage();
+                Image Nimage = image.getScaledInstance(300,250, Image.SCALE_SMOOTH);
+                pic.setIcon(new ImageIcon(Nimage));
+                pic.setSize(300, 250);
+                pic.setLocation(415, 50);
+                f.add(pic);
+            }
+        });
+    }
 }

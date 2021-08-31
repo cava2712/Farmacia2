@@ -9,6 +9,7 @@ import kong.unirest.Unirest;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -23,7 +24,11 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
-
+/**
+ * <p>Questa finestra è la home dell'"Amministratore" dove può gestire tutti i farmacisti (modidfica/creazione/eliminazione)</p>
+ *
+ * @author Luca Barbieri, Davide Cavazzuti
+ **/
 public class HomeAmministratore extends JFrame implements ActionListener {
     private final JTextField Filtra;
     String[] colName= new String[] { "Email","Name" ,"Cognome" };
@@ -51,14 +56,13 @@ public class HomeAmministratore extends JFrame implements ActionListener {
     private final JButton ModificaImmagine;
     private final JLabel Mi;
     private final JCheckBox CBO;
-    ArrayList<Utente> far =null;
+    ArrayList<Utente> listaFarmacisti =null;
     private  JScrollPane scrol;
-    Object[][] farmacisti;
+    Object[][] farmacisti;  //matrice per la JTable
     Utente ug;
     JFrame f;
     ObjectMapper om = new ObjectMapper();
     String path = null;
-
 
     public HomeAmministratore(Utente u) throws Exception {
         super("Gestisci magazzino");
@@ -88,7 +92,6 @@ public class HomeAmministratore extends JFrame implements ActionListener {
         CBO.setLocation(415, 360);
         this.add(CBO);
         CBO.addItemListener(new ItemListener(){
-
             @Override
             public void itemStateChanged(ItemEvent e)
             {
@@ -107,7 +110,6 @@ public class HomeAmministratore extends JFrame implements ActionListener {
             }
         });
 
-
         pic= new JLabel();
         pic.setSize(225, 225);
         pic.setLocation(415, 120);
@@ -124,33 +126,24 @@ public class HomeAmministratore extends JFrame implements ActionListener {
         Filtra.setSize(400, 30);
         Filtra.setLocation(5, 10);
         this.add(Filtra);
+
         CollectionType listType =
                 om.getTypeFactory().constructCollectionType(ArrayList.class, Utente.class);
 
         String url = "http://localhost:8080/farmacisti";
         String json = Unirest.get(url).asString().getBody();
         try {
-            far = om.readValue(json, listType);
+            listaFarmacisti = om.readValue(json, listType);
         } catch (Exception e) {
             throw new Exception(e);
         }
-
-        farmacisti = new Object[far.size()][3];
-        for(int i=0;i<far.size();i++)
+        farmacisti = new Object[listaFarmacisti.size()][3];
+        for(int i = 0; i< listaFarmacisti.size(); i++)
         {
-            farmacisti[i][0]= far.get(i).getEmail();
-            farmacisti[i][1]= far.get(i).getNome();
-            farmacisti[i][2]= far.get(i).getCognome();
+            farmacisti[i][0]= listaFarmacisti.get(i).getEmail();
+            farmacisti[i][1]= listaFarmacisti.get(i).getNome();
+            farmacisti[i][2]= listaFarmacisti.get(i).getCognome();
         }
-        Table = new JTable(farmacisti,colName){
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
-
-
-
 
         Le = new JLabel("Email:");
         Le.setFont(new Font("Arial", Font.PLAIN, 30));
@@ -163,7 +156,6 @@ public class HomeAmministratore extends JFrame implements ActionListener {
         Texte.setLocation(570, 420);
         Texte.setEditable(false);
         this.add(Texte);
-
 
         Ln= new JLabel("Nome:");
         Ln.setFont(new Font("Arial", Font.PLAIN, 30));
@@ -231,39 +223,7 @@ public class HomeAmministratore extends JFrame implements ActionListener {
         Dat.getComponent(1).setEnabled(false);
         this.add(Dat);
 
-
-        Table.setFont(new Font("Arial", Font.PLAIN, 15));
-        Table.setSize(400, 500);
-        Table.setFillsViewportHeight(true);
-        scrol=new JScrollPane(Table);
-        scrol.setLocation(5, 100);
-        scrol.setSize(400,500);
-        this.add(scrol);
-        Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-                int riga=Table.getSelectedRow();
-                Texte.setText(far.get(riga).getEmail());
-                Textn.setText(far.get(riga).getNome());
-                Textc.setText(far.get(riga).getCognome());
-                Textcf.setText(far.get(riga).getCF());
-                Textp.setText(far.get(riga).getPassword());
-                Dat.getModel().setDate(far.get(riga).AnnoNascita(),far.get(riga).MeseNascita(),far.get(riga).GiornoNascita());
-                Dat.getModel().setSelected(true);
-
-                String a = far.get(riga).getImg();
-                if(a=="")
-                    a="default.png";
-                ImageIcon icon = new ImageIcon(String.format("Esame/pic/Utenti/%s",a));
-                Image image = icon.getImage();
-                Image Nimage = image.getScaledInstance(300,250, Image.SCALE_SMOOTH);
-                pic.setIcon(new ImageIcon(Nimage));
-                pic.setSize(300, 250);
-                pic.setLocation(415, 50);
-                f.add(pic);
-            }
-
-        });
+        creazioneTabella();
 
         Back= new JButton("Back");
         Back.setFont(new Font("Arial", Font.PLAIN, 30));
@@ -299,19 +259,20 @@ public class HomeAmministratore extends JFrame implements ActionListener {
         Filtra.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                modifica();
-            }
+                filtraNome();
+            } //evento richiamato ogni volta che viene inserito un carattere nel textField
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                modifica();
-            }
+                filtraNome();
+            }//evento richiamato ogni volta che viene cancellato un carattere nel textField
 
             @Override
             public void changedUpdate(DocumentEvent e) {
                 return;
-            }
+            } //evento richiamato in ogni caso
         });
+
         CBO.setEnabled(false);
         ModificaImmagine.setEnabled(false);
         BtnModifica.addActionListener(this);
@@ -322,73 +283,32 @@ public class HomeAmministratore extends JFrame implements ActionListener {
         ModificaImmagine.addActionListener(this);
         setVisible(true);
     }
-    public void modifica()
+    //funzione per filtrare i nomi dei farmacisti nella tabella
+    public void filtraNome()
     {
-
-        this.remove(scrol);
-        scrol.remove(Table);
         String t = Filtra.getText();
-        int c=0;
         ArrayList<Utente> lisa= new ArrayList<Utente>();
-        for(Utente f : far)
+        for(Utente f : listaFarmacisti)
         {
             if(f.getNome().toLowerCase().startsWith(t))
-            {
                 lisa.add(f);
-                c++;
-            }
         }
-        farmacisti = new Object[c][3];
-        for(int i=0;i<c;i++)
+        farmacisti = new Object[lisa.size()][3];
+        for(int i=0;i<lisa.size();i++)
         {
             farmacisti[i][0]= lisa.get(i).getEmail();
             farmacisti[i][1]= lisa.get(i).getNome();
             farmacisti[i][2]= lisa.get(i).getCognome();
         }
-        Table = new JTable(farmacisti,colName){
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
 
-        Table.setFont(new Font("Arial", Font.PLAIN, 15));
-        Table.setSize(400, 500);
-        Table.setFillsViewportHeight(true);
-        scrol=new JScrollPane(Table);
-        scrol.setLocation(5, 100);
-        scrol.setSize(400,500);
-        this.add(scrol);
-        Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-                int riga=Table.getSelectedRow();
-                Texte.setText(far.get(riga).getEmail());
-                Textn.setText(far.get(riga).getNome());
-                Textc.setText(far.get(riga).getCognome());
-                Textcf.setText(far.get(riga).getCF());
-                Textp.setText(far.get(riga).getPassword());
-
-
-                String a = far.get(riga).getImg();
-                if(a=="")
-                    a="default.png";
-                ImageIcon icon = new ImageIcon(String.format("Esame/pic/Utenti/%s",a));
-                Image image = icon.getImage();
-                Image Nimage = image.getScaledInstance(300,250, Image.SCALE_SMOOTH);
-                pic.setIcon(new ImageIcon(Nimage));
-                pic.setSize(300, 250);
-                pic.setLocation(415, 50);
-                f.add(pic);
-            }
-        });
-
+        scrol.remove(Table);
+        this.remove(scrol);
+        creazioneTabella();
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == ModificaImmagine) {
-
             JFileChooser open = new JFileChooser();
             int option = open.showOpenDialog(this);
             if (option == JFileChooser.APPROVE_OPTION) {
@@ -396,6 +316,7 @@ public class HomeAmministratore extends JFrame implements ActionListener {
                 Mi.setText(path);
             }
         }
+
         if(e.getSource() == BtnModifica)
         {
             CBO.setEnabled(true);
@@ -406,7 +327,7 @@ public class HomeAmministratore extends JFrame implements ActionListener {
                 JOptionPane.showMessageDialog(null, "nessuna riga selezionata!");
                 return;
             }
-            if(far.get(riga).getImg()!= "")
+            if(listaFarmacisti.get(riga).getImg()!= "")
                 CBO.setSelected(true);
             Aggiorna.setVisible(true);
             Textn.setEditable(true);
@@ -416,9 +337,13 @@ public class HomeAmministratore extends JFrame implements ActionListener {
             Texte.setEditable(true);
             Dat.getComponent(1).setEnabled(true);
         }
+
         if (e.getSource() == Aggiorna)
         {
-            String Pimg=null;int riga=Table.getSelectedRow();
+            String Pimg=null;
+            int riga=Table.getSelectedRow();
+            String sEmail=farmacisti[riga][0].toString();
+            Utente sUtente = listaFarmacisti.stream().filter(utente1 -> utente1.getEmail().equals(sEmail)).findFirst().orElse(null);
             //qua prendiamo i dati e poi facciamo la query
             String url = "http://localhost:8080/aggiorna";
             if(CBO.isSelected())
@@ -432,7 +357,7 @@ public class HomeAmministratore extends JFrame implements ActionListener {
             ug.setImg(Pimg);
             String response = Unirest.post(url)
                     .field("types", "farmacista")
-                    .field("emailp",far.get(riga).getEmail())
+                    .field("emailp", sUtente.getEmail())
                     .field("email", Texte.getText())
                     .field("password",Textp.getText())
                     .field("cf", Textcf.getText())
@@ -442,13 +367,13 @@ public class HomeAmministratore extends JFrame implements ActionListener {
                     .field("dataDiNascita",String.format("%d-%d-%d",Dat.getModel().getYear(),Dat.getModel().getMonth()+1,Dat.getModel().getDay()))
                     .asString().getBody();
 
-            far.get(riga).setCF(Textcf.getText());
-            far.get(riga).setNome(Textn.getText());
-            far.get(riga).setCognome(Textc.getText());
-            far.get(riga).setEmail(Texte.getText());
-            far.get(riga).setPassword(Textp.getText());
+            listaFarmacisti.get(listaFarmacisti.indexOf(sUtente)).setCF(Textcf.getText());
+            listaFarmacisti.get(listaFarmacisti.indexOf(sUtente)).setNome(Textn.getText());
+            listaFarmacisti.get(listaFarmacisti.indexOf(sUtente)).setCognome(Textc.getText());
+            listaFarmacisti.get(listaFarmacisti.indexOf(sUtente)).setEmail(Texte.getText());
+            listaFarmacisti.get(listaFarmacisti.indexOf(sUtente)).setPassword(Textp.getText());
             Date data = (Date)Dat.getModel().getValue();
-            far.get(riga).setDataDiNascita(data);
+            listaFarmacisti.get(listaFarmacisti.indexOf(sUtente)).setDataDiNascita(data);
             Aggiorna.setVisible(false);
             Textc.setEditable(false);
             Textn.setEditable(false);
@@ -457,6 +382,7 @@ public class HomeAmministratore extends JFrame implements ActionListener {
             Textp.setEditable(false);
             JOptionPane.showMessageDialog(null, "Dati aggiornati correttamente");
 
+            //se la checkbox è spuntata copio l'immagine nella cartella giusta
             InputStream is = null;
             OutputStream os = null;
             if(!CBO.isSelected() && path!=null) {
@@ -480,8 +406,6 @@ public class HomeAmministratore extends JFrame implements ActionListener {
                         ioException.printStackTrace();
                     }
                 }
-
-
             }
             ImageIcon icon = new ImageIcon(String.format("Esame/pic/Utenti/%s",Pimg));
             Image image = icon.getImage();
@@ -500,63 +424,25 @@ public class HomeAmministratore extends JFrame implements ActionListener {
         if (e.getSource() == EliminaFarmaciscta) {
             String url = "http://localhost:8080/eliminaFista";
             int riga=Table.getSelectedRow();
+            String sEmail=farmacisti[riga][0].toString();
+            Utente sUtente = listaFarmacisti.stream().filter(utente1 -> utente1.getEmail().equals(sEmail)).findFirst().orElse(null);
             if(riga==-1)
             {
                 JOptionPane.showMessageDialog(null, "Nessuna riga selezionata!");
                 return;
             }
             String response = Unirest.post(url)
-                    .field("email", far.get(riga).getEmail())
+                    .field("email", sUtente.getEmail())
                     .asString().getBody();
-            far.remove(riga);
-            scrol.remove(Table);
-            this.remove(scrol);
-            farmacisti = new Object[far.size()][3];
-            for(int i=0;i<far.size();i++)
+            listaFarmacisti.remove(listaFarmacisti.indexOf(sUtente));
+            farmacisti = new Object[listaFarmacisti.size()][3];
+            for(int i = 0; i< listaFarmacisti.size(); i++)
             {
-                farmacisti[i][0]= far.get(i).getEmail();
-                farmacisti[i][1]= far.get(i).getNome();
-                farmacisti[i][2]= far.get(i).getCognome();
+                farmacisti[i][0]= listaFarmacisti.get(i).getEmail();
+                farmacisti[i][1]= listaFarmacisti.get(i).getNome();
+                farmacisti[i][2]= listaFarmacisti.get(i).getCognome();
             }
-            Table = new JTable(farmacisti,colName){
-                @Override
-                public boolean isCellEditable(int row, int column) {
-                    return false;
-                }
-            };
-
-            Table.setFont(new Font("Arial", Font.PLAIN, 15));
-            Table.setSize(400, 500);
-            Table.setFillsViewportHeight(true);
-            scrol=new JScrollPane(Table);
-            scrol.setLocation(5, 100);
-            scrol.setSize(400,500);
-            this.add(scrol);
-            Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-                @Override
-                public void valueChanged(ListSelectionEvent e) {
-                    int riga=Table.getSelectedRow();
-                    Texte.setText(far.get(riga).getEmail());
-                    Textn.setText(far.get(riga).getNome());
-                    Textc.setText(far.get(riga).getCognome());
-                    Textcf.setText(far.get(riga).getCF());
-                    Textp.setText(far.get(riga).getPassword());
-                    Dat.getModel().setDate(far.get(riga).AnnoNascita(),far.get(riga).MeseNascita(),far.get(riga).GiornoNascita());
-                    Dat.getModel().setSelected(true);
-
-                    String a = far.get(riga).getImg();
-                    if(a=="")
-                        a="default.png";
-                    ImageIcon icon = new ImageIcon(String.format("Esame/pic/Utenti/%s",a));
-                    Image image = icon.getImage();
-                    Image Nimage = image.getScaledInstance(300,250, Image.SCALE_SMOOTH);
-                    pic.setIcon(new ImageIcon(Nimage));
-                    pic.setSize(300, 250);
-                    pic.setLocation(415, 50);
-                    f.add(pic);
-                }
-
-            });
+            creazioneTabella();
             JOptionPane.showMessageDialog(null, "Farmacista eliminato correttamente!");
             return;
         }
@@ -566,9 +452,51 @@ public class HomeAmministratore extends JFrame implements ActionListener {
             new NuovoFarmacista(ug);
             return;
         }
-
     }
 
+    private void creazioneTabella() {
+        Table = new JTable(farmacisti,colName){
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        Table.setFont(new Font("Arial", Font.PLAIN, 15));
+        Table.setSize(400, 500);
+        Table.setFillsViewportHeight(true);
+        scrol=new JScrollPane(Table);
+        scrol.setLocation(5, 100);
+        scrol.setSize(400,500);
+        this.add(scrol);
+
+        Table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                int riga=Table.getSelectedRow();
+                String sEmail=farmacisti[riga][0].toString();
+                Utente sUtente = listaFarmacisti.stream().filter(utente1 -> utente1.getEmail().equals(sEmail)).findFirst().orElse(null);
+                Texte.setText(sUtente.getEmail());
+                Textn.setText(sUtente.getNome());
+                Textc.setText(sUtente.getCognome());
+                Textcf.setText(sUtente.getCF());
+                Textp.setText(sUtente.getPassword());
+                Dat.getModel().setDate(sUtente.AnnoNascita(), sUtente.MeseNascita(), sUtente.GiornoNascita());
+                Dat.getModel().setSelected(true);
+
+                String a = sUtente.getImg();
+                if(a=="")
+                    a="default.png";
+                ImageIcon icon = new ImageIcon(String.format("Esame/pic/Utenti/%s",a));
+                Image image = icon.getImage();
+                Image Nimage = image.getScaledInstance(300,250, Image.SCALE_SMOOTH);
+                pic.setIcon(new ImageIcon(Nimage));
+                pic.setSize(300, 250);
+                pic.setLocation(415, 50);
+                f.add(pic);
+            }
+        });
+    }
 }
 
 

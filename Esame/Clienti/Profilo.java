@@ -16,7 +16,11 @@ import java.awt.event.ItemListener;
 import java.io.*;
 import java.util.Date;
 import java.util.Properties;
-
+/**
+ * <p>Questa è la finestra dove l'attuale cliente può gestire e modificare tutte le informazioni del suo profilo </p>
+ *
+ * @author Luca Barbieri, Davide Cavazzuti
+ **/
 public class Profilo extends JFrame implements ActionListener {
     private final JTextField TextNome;
     private final JTextField TextPass;
@@ -41,8 +45,8 @@ public class Profilo extends JFrame implements ActionListener {
     Utente ug=null;
     String path = null;
     String Pimg = null;
-    public Profilo(Utente u) {
 
+    public Profilo(Utente u) {
         super(String.format("Profilo di %s",u.getNome()));
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setSize(700, 700);
@@ -69,7 +73,6 @@ public class Profilo extends JFrame implements ActionListener {
         CBO.setLocation(250, 100);
         this.add(CBO);
         CBO.addItemListener(new ItemListener(){
-
             @Override
             public void itemStateChanged(ItemEvent e)
             {
@@ -278,6 +281,7 @@ public class Profilo extends JFrame implements ActionListener {
             emailp=ug.getEmail();
             JOptionPane.showMessageDialog(null, "Dati aggiornati correttamente");
 
+            //copiamo l'immagine selezionata nella giusta cartella
             InputStream is = null;
             OutputStream os = null;
             if(!CBO.isSelected() && path!=null) {
@@ -301,8 +305,6 @@ public class Profilo extends JFrame implements ActionListener {
                         ioException.printStackTrace();
                     }
                 }
-
-
             }
             String a = ug.getImg();
             ImageIcon icon = new ImageIcon(String.format("Esame/pic/Utenti/%s",a));

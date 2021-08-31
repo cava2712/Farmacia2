@@ -4,7 +4,10 @@ import javax.swing.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-
+/**
+ * <p>Questa classe serve per indicare la formattazione delle date come utilizzata nel nostro paese </p>
+ *
+ **/
 public class DateLabelFormatter extends JFormattedTextField.AbstractFormatter {
 
     private String datePattern = "dd-MM-yyyy";

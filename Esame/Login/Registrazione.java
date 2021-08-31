@@ -1,9 +1,9 @@
 package Esame.Login;
 
 import Esame.Classi.DateLabelFormatter;
-import Esame.Clienti.HomeCliente;
 import Esame.Classi.Types;
 import Esame.Classi.Utente;
+import Esame.Clienti.HomeCliente;
 import kong.unirest.Unirest;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
@@ -19,7 +19,11 @@ import java.io.*;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Properties;
-
+/**
+ * <p>Questa finestra serve per la creazione di un nuovo "Cliente"</p>
+ *<p>La creazione di un nuovo "Farmacista" viene eseguita soltanto dall' "Amministratore"</p>
+ * @author Luca Barbieri, Davide Cavazzuti
+ **/
 public class Registrazione extends JFrame implements ActionListener {
     private final JTextField TextNome;
     private final JPasswordField TextPass;
@@ -174,62 +178,62 @@ public class Registrazione extends JFrame implements ActionListener {
                 JOptionPane.showMessageDialog(null, "devi inserire tutti i campi");
                 return;
             }
-                Date data = (Date)Dat.getModel().getValue();
-                //qua prendiamo i dati e poi facciamo la query
-                String url = "http://localhost:8080/crea";
-                String Pimg;
-                if(CBO.isSelected())
-                {
-                    Pimg= "default.png";
-                }
-                else
-                {
-                    Pimg= String.format("%s.png", TextEmail.getText());
-                }
-                String response = Unirest.post(url)
-                        .field("types", "cliente")
-                        .field("email", TextEmail.getText())
-                        .field("password", String.valueOf(TextPass.getPassword()))
-                        .field("cf", TextCF.getText())
-                        .field("cognome", TextCognome.getText())
-                        .field("nome", TextNome.getText())
-                        .field("img",Pimg)
-                        .field("dataDiNascita",String.format("%d-%d-%d",Dat.getModel().getYear(),Dat.getModel().getMonth(),Dat.getModel().getDay()))
-                        .asString().getBody();
-                //se va a buon fine creiamo l'utente e lo passiamo come parametro alla finestra successiva
-                if (response.equals("doppio")) {
-                    JOptionPane.showMessageDialog(null, "Esiste già un account con quest'email");
-                    return;
-                }
-                InputStream is = null;
-                OutputStream os = null;
-                if(!CBO.isSelected()) {
+            Date data = (Date)Dat.getModel().getValue();
+            //qua prendiamo i dati e poi facciamo la query
+            String url = "http://localhost:8080/crea";
+            String Pimg;
+            if(CBO.isSelected())
+            {
+                Pimg= "default.png";
+            }
+            else
+            {
+                Pimg= String.format("%s.png", TextEmail.getText());
+            }
+            String response = Unirest.post(url)
+                    .field("types", "cliente")
+                    .field("email", TextEmail.getText())
+                    .field("password", String.valueOf(TextPass.getPassword()))
+                    .field("cf", TextCF.getText())
+                    .field("cognome", TextCognome.getText())
+                    .field("nome", TextNome.getText())
+                    .field("img",Pimg)
+                    .field("dataDiNascita",String.format("%d-%d-%d",Dat.getModel().getYear(),Dat.getModel().getMonth(),Dat.getModel().getDay()))
+                    .asString().getBody();
+            //se va a buon fine creiamo l'utente e lo passiamo come parametro alla finestra successiva
+            if (response.equals("doppio")) {
+                JOptionPane.showMessageDialog(null, "Esiste già un account con quest'email");
+                return;
+            }
+            InputStream is = null;
+            OutputStream os = null;
+            if(!CBO.isSelected()) {
+                try {
+                    is = new FileInputStream(new File(path));
+                    os = new FileOutputStream(new File(String.format("Esame/pic/Utenti/%s.png", TextEmail.getText())));
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = is.read(buffer)) > 0) {
+                        os.write(buffer, 0, length);
+                    }
+                } catch (FileNotFoundException fileNotFoundException) {
+                    fileNotFoundException.printStackTrace();
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                } finally {
                     try {
-                        is = new FileInputStream(new File(path));
-                        os = new FileOutputStream(new File(String.format("Esame/pic/Utenti/%s.png", TextEmail.getText())));
-                        byte[] buffer = new byte[1024];
-                        int length;
-                        while ((length = is.read(buffer)) > 0) {
-                            os.write(buffer, 0, length);
-                        }
-                    } catch (FileNotFoundException fileNotFoundException) {
-                        fileNotFoundException.printStackTrace();
+                        is.close();
+                        os.close();
                     } catch (IOException ioException) {
                         ioException.printStackTrace();
-                    } finally {
-                        try {
-                            is.close();
-                            os.close();
-                        } catch (IOException ioException) {
-                            ioException.printStackTrace();
-                        }
                     }
                 }
+            }
 
             Utente u = new Utente(Types.cliente, TextNome.getText(), String.valueOf(TextPass.getPassword()), TextCognome.getText(), TextEmail.getText(), TextCF.getText(), Pimg,data);
 
-                dispose();
-                new HomeCliente(u);
+            dispose();
+            new HomeCliente(u);
         }
         if (e.getSource() == BtnImg) {
             JFileChooser open = new JFileChooser();
@@ -238,7 +242,6 @@ public class Registrazione extends JFrame implements ActionListener {
                 path = open.getSelectedFile().getAbsolutePath();
 
                 Img.setText(path);
-
             }
         }
         if (e.getSource() == CBO) {
@@ -246,9 +249,4 @@ public class Registrazione extends JFrame implements ActionListener {
             return;
         }
     }
-
-    public static void main(String[] args) {
-        new Registrazione();
-    }
-
 }

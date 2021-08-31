@@ -3,8 +3,16 @@ package Esame.Classi;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-
+/**
+ * <p>Questa classe rapperesenta l'oggetto "Utente"</p>
+ * <p>Questa classe è caratterizzata dall'utilizzo dell'enumeratore "Types" per descrivere che tipo di Utente sta utilizzando l'applicazione </p>
+ *
+ * @author Luca Barbieri, Davide Cavazzuti
+ **/
 public class Utente {
+    /**
+     *
+      */
     private Types t;
     private String nome,cognome,password,email,CF,img;
     public ArrayList<Farmaco> carrello;
@@ -109,7 +117,7 @@ public class Utente {
     {
         int conta=0;
         for (Farmaco f: this.carrello) {
-            conta+=f.getQuantità();
+            conta+=f.getQuantita();
         }
         return conta;
     }

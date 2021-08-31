@@ -1,22 +1,19 @@
 package Esame.Farmacisti;
+
 import javax.swing.*;
 import java.awt.*;
-
-import Esame.Classi.Utente;
-import Esame.Clienti.HomeCliente;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.*;
-import java.util.*;
+/**
+ * <p>Questa è la finestra che compare quando il farmacista vuole visualizzare una ricetta più in grande </p>
+ *
+ * @author Luca Barbieri, Davide Cavazzuti
+ **/
 public class ingrandisci extends JFrame implements ActionListener{
     private  JLabel pic;
     public ingrandisci(String nome,String farm)
     {
-        super(String.format("Immetti Ricetta"));
+        super(String.format("Ricetta %s",farm));
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setSize(720, 700);
         setResizable(false);

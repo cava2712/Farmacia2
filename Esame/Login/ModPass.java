@@ -6,24 +6,29 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+/**
+ * <p>Questa finestra permette di modificare la password di un utente in caso di dimenticanza</p>
+ *
+ * @author Luca Barbieri, Davide Cavazzuti
+ **/
 public class ModPass extends JFrame implements ActionListener {
     private final JTextField TextEmail;
     private final JTextField TextNpass;
     private final JButton Modifica;
     private final JLabel Le;
     private final JLabel Lnp;
+
     public ModPass() {
         super("Modifica password");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setSize(400, 400);
         setResizable(false);
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-        this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
+        this.setLocation(dim.width / 2 - this.getSize().width / 2, dim.height / 2 - this.getSize().height / 2);
         this.setLayout(null);
 
 
-        Le=new JLabel("Email:");
+        Le = new JLabel("Email:");
         Le.setFont(new Font("Arial", Font.PLAIN, 15));
         Le.setSize(100, 30);
         Le.setLocation(10, 50);
@@ -34,7 +39,7 @@ public class ModPass extends JFrame implements ActionListener {
         TextEmail.setLocation(180, 50);
         this.add(TextEmail);
 
-        Lnp=new JLabel("Nuova Password:");
+        Lnp = new JLabel("Nuova Password:");
         Lnp.setFont(new Font("Arial", Font.PLAIN, 15));
         Lnp.setSize(170, 30);
         Lnp.setLocation(10, 150);
@@ -45,18 +50,15 @@ public class ModPass extends JFrame implements ActionListener {
         TextNpass.setLocation(180, 150);
         this.add(TextNpass);
 
-        Modifica=new JButton("Modifica Password");
+        Modifica = new JButton("Modifica Password");
         Modifica.setFont(new Font("Arial", Font.PLAIN, 15));
         Modifica.setSize(375, 30);
         Modifica.setLocation(5, 270);
         this.add(Modifica);
 
-
-
         Modifica.addActionListener(this);
 
         setVisible(true);
-
     }
 
     @Override
@@ -69,19 +71,13 @@ public class ModPass extends JFrame implements ActionListener {
                     .field("password", String.valueOf(TextNpass.getText()))
                     .asString().getBody();
 
-            if (response.equals("errore email"))
-            {
+            if (response.equals("errore email")) {
                 JOptionPane.showMessageDialog(null, "Non esiste un account su quest'email");
                 return;
             }
             JOptionPane.showMessageDialog(null, "Password modificata correttamente");
             dispose();
             new loginInterface();
-
         }
-    }
-
-    public static void main(String[] args) {
-        new ModPass();
     }
 }
